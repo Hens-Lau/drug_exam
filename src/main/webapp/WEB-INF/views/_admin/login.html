@@ -154,14 +154,15 @@
 			"/login",
 			JSON.stringify(user),
 			function(data) {
+			    console.log('登陆返回结果是:'+data)
 				if(data == 0) {
 					toastr.error('验证码错误!', '登陆');
 				}
 				if(data == 1) {
 					toastr.error('账号或密码错误!', '登陆');
 				}
-				if(data == 2) {
-					window.location="http://www.baidu.com";
+				if(data == -1) {
+					toastr.error('用户名或密码错误!','登陆');
 				}
 				if(data == 3) {
 					window.location="http://www.baidu.com";

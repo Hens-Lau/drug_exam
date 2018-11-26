@@ -2,7 +2,7 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.SysInfo;
-import com.here.entity.vo.SysInfoRequest;
+import com.here.entity.vo.request.SysInfoRequest;
 
 public interface SysInfoService {
     /**

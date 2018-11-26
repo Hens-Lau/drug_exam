@@ -2,7 +2,7 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.UserInfo;
-import com.here.entity.vo.UserRequest;
+import com.here.entity.vo.request.UserRequest;
 
 import java.util.List;
 

@@ -2,12 +2,10 @@ package com.here.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import com.here.dao.ExamLogMapper;
 import com.here.entity.ExamLog;
 import com.here.entity.ExamLogExample;
-import com.here.entity.vo.ExamLogRequest;
+import com.here.entity.vo.request.ExamLogRequest;
 import com.here.service.ExamLogService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

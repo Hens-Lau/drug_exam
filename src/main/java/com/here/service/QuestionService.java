@@ -2,7 +2,9 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.QuestionWithBLOBs;
-import com.here.entity.vo.QuestionRequest;
+import com.here.entity.vo.request.QuestionRequest;
+
+import java.util.List;
 
 public interface QuestionService {
     /**
@@ -28,8 +30,8 @@ public interface QuestionService {
 
     /**
      * 删除问题
-     * @param questionId
+     * @param questionIdList
      * @return
      */
-    boolean deleteQuestion(Integer questionId);
+    boolean deleteQuestion(List<Integer> questionIdList);
 }

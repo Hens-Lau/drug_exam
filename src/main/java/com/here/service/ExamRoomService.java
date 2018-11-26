@@ -2,7 +2,7 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamRoom;
-import com.here.entity.vo.ExamRoomRequest;
+import com.here.entity.vo.request.ExamRoomRequest;
 
 public interface ExamRoomService {
     /**

@@ -2,7 +2,7 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamLog;
-import com.here.entity.vo.ExamLogRequest;
+import com.here.entity.vo.request.ExamLogRequest;
 
 import java.util.List;
 

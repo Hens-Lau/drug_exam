@@ -1,9 +1,8 @@
 package com.here.controller.user;
 
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.here.entity.UserInfo;
-import com.here.entity.vo.UserRequest;
+import com.here.entity.vo.request.UserRequest;
 import com.here.service.UserInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,13 +25,11 @@ public class UserInfoDataController {
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     public String login(HttpServletRequest request, UserInfo userInfo){
         HttpSession session = request.getSession(false);
-        if(session==null || !StringUtils.equals((String)session.getAttribute("code"),userInfo.getCode())){
+        if(session==null || !StringUtils.equalsIgnoreCase((String)session.getAttribute("code"),userInfo.getCode())){
             return "0";
         }
         Short type = userInfoService.queryUserType(userInfo);
-        if(type<0){
-            return "0";
-        }
+        LOG.info("用户登陆 type="+type);
         return type.toString();
     }
 
@@ -69,15 +66,15 @@ public class UserInfoDataController {
     /**
      * 用户批量审核
      * @param request
-     * @param userIdList
+     * @param userRequest
      * @return
      */
     @RequestMapping(value = "/admin/batchVerifyUser")
-    public boolean verifyUser(HttpServletRequest request,List<String> userIdList){
-        if(CollectionUtils.isEmpty(userIdList)){
+    public boolean batchVerifyUser(HttpServletRequest request,@RequestBody UserRequest userRequest){
+        if(userRequest==null || CollectionUtils.isEmpty(userRequest.getIdList())){
             LOG.error("审核失败,用户列表为空");
             return false;
         }
-        return userInfoService.verify(userIdList);
+        return userInfoService.verify(userRequest.getIdList());
     }
 }

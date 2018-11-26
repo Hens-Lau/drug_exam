@@ -2,7 +2,7 @@ package com.here.controller.exam;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamPaper;
-import com.here.entity.vo.ExamPaperRequest;
+import com.here.entity.vo.request.ExamPaperRequest;
 import com.here.service.ExamPaperService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

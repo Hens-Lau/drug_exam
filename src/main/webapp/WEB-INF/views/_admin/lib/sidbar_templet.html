@@ -1,6 +1,12 @@
 <#macro sidbar urlName>
-    <li <#if urlName == 'index.html'>class="active"</#if>>
-    	<a href="/admin/index.html">
+	<li <#if urlName == 'index.html'>class="active"</#if>>
+		<a href="/admin/index.html">
+			<i class="glyphicon glyphicon-th-large"></i>
+			首页
+		</a>
+	</li>
+    <li <#if urlName == 'ztree.html'>class="active"</#if>>
+    	<a href="/admin/category.html">
     		<i class="glyphicon glyphicon-th-large"></i>
     		 类别
     	</a>

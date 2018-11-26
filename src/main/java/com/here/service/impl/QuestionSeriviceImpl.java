@@ -5,13 +5,14 @@ import com.github.pagehelper.PageInfo;
 import com.here.dao.QuestionMapper;
 import com.here.entity.QuestionExample;
 import com.here.entity.QuestionWithBLOBs;
-import com.here.entity.vo.QuestionRequest;
+import com.here.entity.vo.request.QuestionRequest;
 import com.here.service.QuestionService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class QuestionSeriviceImpl implements QuestionService {
 
     @Override
     public PageInfo<QuestionWithBLOBs> selectQuestionList(QuestionRequest questionRequest) {
+        PageHelper.startPage(questionRequest.getPage(),questionRequest.getPageSize());
         if(questionRequest==null){
             LOG.error("分页问题查询参数不能为空");
             return null;
@@ -44,9 +46,8 @@ public class QuestionSeriviceImpl implements QuestionService {
             criteria.andTypeEqualTo(questionRequest.getType().shortValue());
         }
         List<QuestionWithBLOBs> questionWithBLOBsList = questionMapper.selectByExampleWithBLOBs(example);
-        PageHelper.startPage(questionRequest.getPage(),questionRequest.getPageSize());
         PageInfo<QuestionWithBLOBs> pageInfo = new PageInfo<>(questionWithBLOBsList);
-        pageInfo.setTotal(questionWithBLOBsList==null?0:questionWithBLOBsList.size());
+//        pageInfo.setTotal(questionWithBLOBsList==null?0:questionWithBLOBsList.size());
         return pageInfo;
     }
 
@@ -84,11 +85,14 @@ public class QuestionSeriviceImpl implements QuestionService {
         return questionMapper.updateByPrimaryKey(question)>0?true:false;
     }
 
-    public boolean deleteQuestion(Integer questionId){
-        if(questionId==null || questionId<=0){
+    public boolean deleteQuestion(List<Integer> questionIdList){
+        if(CollectionUtils.isEmpty(questionIdList)){
             LOG.error("问题id不能为空");
             return false;
         }
-        return questionMapper.deleteByPrimaryKey(questionId)>0?true:false;
+        QuestionExample example = new QuestionExample();
+        QuestionExample.Criteria criteria = example.createCriteria();
+        criteria.andIdIn(questionIdList);
+        return questionMapper.deleteByExample(example)>0?true:false;
     }
 }

@@ -2,14 +2,13 @@ package com.here.controller.user;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.UserInfo;
-import com.here.entity.vo.UserRequest;
+import com.here.entity.vo.request.UserRequest;
 import com.here.service.UserInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,13 +30,21 @@ public class UserInfoPageController {
         return mav;
     }
 
+    @RequestMapping(value = "/user/exam.html")
+    public ModelAndView userIndex(HttpServletRequest request,HttpServletResponse response){
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("_user/exam");
+        return mav;
+    }
+
     @RequestMapping(value = "/admin/user.html")
     public ModelAndView userInfo(HttpServletRequest req, HttpServletResponse resp){
         ModelAndView mav = new ModelAndView();
         //查询用户信息
         List<UserInfo> userInfoList = getUserList();
         mav.addObject("allUsers",userInfoList);
-        mav.setViewName("_admin/user");
+//        mav.setViewName("_admin/user");
+        mav.setViewName("_admin/userList");
         return mav;
     }
 

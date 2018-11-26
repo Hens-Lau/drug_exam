@@ -1,0 +1,190 @@
+<#import "/_admin/lib/sidbar_templet.html" as sidbarTemplet>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <title>知识点</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <!--<link rel="stylesheet" href="/static/ztree/css/demo.css" type="text/css">-->
+    <link rel="stylesheet" href="/static/assets/yeti/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/assets/toastr-master/toastr.css" />
+    <script type="text/javascript" src="/static/js/jquery-1.10.2.min.js" ></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js" ></script>
+    <link rel="stylesheet" href="/static/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="/static/ztree/js/jquery.ztree.core.js"></script>
+    <script type="text/javascript" src="/static/ztree/js/jquery.ztree.excheck.js"></script>
+    <script type="text/javascript" src="/static/ztree/js/jquery.ztree.exedit.js"></script>
+    <script type="text/javascript">
+        <!--
+        var setting = {
+            view: {
+                dblClickExpand: false
+            },
+            check: {
+                enable: true
+            },
+            callback: {
+                onRightClick: OnRightClick
+            }
+        };
+
+        var zNodes =[];
+        $(document).ready(function(){
+            console.log('加载所有分类')
+            $.ajax({
+                type:"post",
+                async:false,
+                dataType:"json",
+                url:"/admin/getCatList",//getRootPath_web()获取根目录地址的方法，另一篇博客里面有
+                success:function(defaultData){
+                    //  defaultData = JSON.parse(defaultData);
+                    zNodes = defaultData
+                }
+            });
+        });
+
+        function OnRightClick(event, treeId, treeNode) {
+            var e = event || window.event
+            if (!treeNode && event.target.tagName.toLowerCase() != "button" && $(event.target).parents("a").length == 0) {
+                zTree.cancelSelectedNode();
+                showRMenu("root", e.clientX, e.clientY);
+            } else if (treeNode && !treeNode.noR) {
+                zTree.selectNode(treeNode);
+                showRMenu("node", e.clientX, e.clientY);
+            }
+        }
+
+        function showRMenu(type, x, y) {
+            console.log('x='+x)
+            console.log('y='+y)
+            $("#rMenu ul").show();
+            if (type=="root") {
+                $("#m_del").hide();
+                $("#m_check").hide();
+                $("#m_unCheck").hide();
+            } else {
+                $("#m_del").show();
+                $("#m_check").show();
+                $("#m_unCheck").show();
+            }
+            console.log("document.body.scrollTop="+document.documentElement.scrollTop)
+            console.log("document.body.scrollLeft="+document.documentElement.scrollLeft)
+            y += document.body.scrollTop;
+            x += document.body.scrollLeft;
+            rMenu.css({"top":y+"px", "left":x+"px", "visibility":"visible","position":"relative"});
+
+            $("body").bind("mousedown", onBodyMouseDown);
+        }
+        function hideRMenu() {
+            if (rMenu) rMenu.css({"visibility": "hidden"});
+            $("body").unbind("mousedown", onBodyMouseDown);
+        }
+        function onBodyMouseDown(event){
+            if (!(event.target.id == "rMenu" || $(event.target).parents("#rMenu").length>0)) {
+                rMenu.css({"visibility" : "hidden"});
+            }
+        }
+        var addCount = 1;
+        function addTreeNode() {
+            hideRMenu();
+            var newNode = { name:"增加" + (addCount++)};
+            if (zTree.getSelectedNodes()[0]) {
+                newNode.checked = zTree.getSelectedNodes()[0].checked;
+                zTree.addNodes(zTree.getSelectedNodes()[0], newNode);
+            } else {
+                zTree.addNodes(null, newNode);
+            }
+        }
+        function removeTreeNode() {
+            hideRMenu();
+            var nodes = zTree.getSelectedNodes();
+            if (nodes && nodes.length>0) {
+                if (nodes[0].children && nodes[0].children.length > 0) {
+                    var msg = "要删除的节点是父节点，如果删除将连同子节点一起删掉。\n\n请确认！";
+                    if (confirm(msg)==true){
+                        zTree.removeNode(nodes[0]);
+                    }
+                } else {
+                    zTree.removeNode(nodes[0]);
+                }
+            }
+        }
+        // function checkTreeNode(checked) {
+        //     var nodes = zTree.getSelectedNodes();
+        //     if (nodes && nodes.length>0) {
+        //         zTree.checkNode(nodes[0], checked, true);
+        //     }
+        //     hideRMenu();
+        // }
+        function resetTree() {
+            hideRMenu();
+            $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+        }
+
+        var zTree, rMenu;
+        $(document).ready(function(){
+            $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+            zTree = $.fn.zTree.getZTreeObj("treeDemo");
+            rMenu = $("#rMenu");
+        });
+        //-->
+    </script>
+    <style type="text/css">
+        div#rMenu {position:relative; visibility:hidden; top:0; background-color: #555;text-align: left;padding: 2px;}
+        div#rMenu ul li{
+            margin: 1px 0;
+            padding: 0 5px;
+            cursor: pointer;
+            list-style: none outside none;
+            background-color: #DFDFDF;
+        }
+
+         .backs{
+
+             background: url(/static/img/backs1.jpg);
+             background-size:100%;
+             background-attachment: fixed;
+         }
+
+        .box{
+            box-shadow:0 0 10px #000 !important;
+        }
+        .pad{
+            margin-top:1.5%;
+            margin-left:0.5%;
+        }
+    </style>
+</head>
+
+<body class="backs">
+<@sidbarTemplet.header />
+<div class="container-fluid box">
+    <div class="col-xs-2 sidebar box">
+        <ul class="nav nav-sidebar">
+            <@sidbarTemplet.sidbar "ztree.html" />
+        </ul>
+    </div>
+    <div class="col-xs-10 col-xs-offset-2 content" id="content">
+        <div class="panel panel-primary box pad">
+            <div class="panel">
+                <ul id="treeDemo" class="ztree"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<div class="content_wrap">
+    <div class="zTreeDemoBackground left">
+        <ul id="treeDemo" class="ztree"></ul>
+    </div>
+</div>-->
+<div id="rMenu">
+    <div>
+    <ul>
+        <li id="m_add" onclick="addTreeNode();">增加节点</li>
+        <li id="m_del" onclick="removeTreeNode();">删除节点</li>
+        <li id="m_check" onclick="editTreeNode();">Check节点</li>
+    </ul>
+    </div>
+</div>
+</body>
+</HTML>

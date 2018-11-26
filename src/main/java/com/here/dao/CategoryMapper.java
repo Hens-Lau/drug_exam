@@ -94,4 +94,11 @@ public interface CategoryMapper {
      * @mbg.generated Mon Oct 15 11:20:36 CST 2018
      */
     int updateByPrimaryKey(Category record);
+
+    /**
+     * 级联查询所有类别
+     * @param id
+     * @return
+     */
+    List<Category> getAllCategory(@Param("pid") int id);
 }

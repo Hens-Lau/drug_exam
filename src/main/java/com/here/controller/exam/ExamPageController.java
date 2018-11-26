@@ -1,5 +1,6 @@
 package com.here.controller.exam;
 
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,13 @@ public class ExamPageController {
     public ModelAndView testPaper(){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("_admin/testPaper");
+        return mav;
+    }
+
+    @RequestMapping(value = "/admin/addExam.html")
+    public ModelAndView addPaper(){
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("_admin/addExam");
         return mav;
     }
 }

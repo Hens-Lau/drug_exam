@@ -5,7 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.here.dao.ExamRoomMapper;
 import com.here.entity.ExamRoom;
 import com.here.entity.ExamRoomExample;
-import com.here.entity.vo.ExamRoomRequest;
+import com.here.entity.vo.request.ExamRoomRequest;
 import com.here.service.ExamRoomService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

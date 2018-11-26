@@ -2,16 +2,22 @@ package com.here.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.here.dao.ExamInfoMapper;
 import com.here.dao.ExamPaperMapper;
+import com.here.entity.ExamInfo;
+import com.here.entity.ExamInfoExample;
 import com.here.entity.ExamPaper;
 import com.here.entity.ExamPaperExample;
-import com.here.entity.vo.ExamPaperRequest;
+import com.here.entity.vo.request.ExamPaperRequest;
 import com.here.service.ExamPaperService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,8 +28,16 @@ public class ExamPaperServiceImpl implements ExamPaperService {
 
     @Autowired
     private ExamPaperMapper examPaperMapper;
+    @Autowired
+    private ExamInfoMapper examInfoMapper;
+
     @Override
     public boolean saveExamPaper(ExamPaper examPaper) {
+        List<Integer> questionIdList = examPaper.getQuestionIdList();
+        if(CollectionUtils.isEmpty(questionIdList)){
+            LOG.error("考题不能为空");
+            return false;
+        }
         //名称
         if(StringUtils.isBlank(examPaper.getName())){
             LOG.error("考卷名为空");
@@ -46,13 +60,60 @@ public class ExamPaperServiceImpl implements ExamPaperService {
         }
         //状态
 
-        return examPaperMapper.insertSelective(examPaper)>0?true:false;
+        final int examId = examPaperMapper.insertSelective(examPaper);
+        if(examId<1){
+            LOG.error("新增考卷失败,id={}",examId);
+            return false;
+        }
+        return saveQuestionList(questionIdList,examId);
+    }
+
+    /**
+     * 新增考题
+     * @param questionIdList
+     * @param examId
+     * @return
+     */
+    private boolean saveQuestionList(List<Integer> questionIdList,final Integer examId){
+        return saveQuestionList(questionIdList,examId,false);
+    }
+    /**
+     * 持久化问题
+     * @param questionIdList
+     * @param examId
+     * @param isModify
+     * @return
+     */
+    private boolean saveQuestionList(List<Integer> questionIdList, final Integer examId,boolean isModify){
+        List<ExamInfo> examInfoList = Lists.transform(questionIdList, new Function<Integer, ExamInfo>() {
+            @Override
+            public ExamInfo apply(Integer integer) {
+                ExamInfo examInfo = new ExamInfo();
+                examInfo.setQuestionId(integer);
+                examInfo.setExamId(examId);
+                return examInfo;
+            }
+        });
+        //保存考题信息
+        for(ExamInfo examInfo:examInfoList){
+            if(examInfoMapper.insertSelective(examInfo)<1){
+                LOG.error("保存考卷考题失败,{},{},{}",examInfo.getExamId(),examInfo.getQuestionId(),isModify);
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean modifyExamPaper(ExamPaper examPaper) {
         if(examPaper.getId()==null){
             LOG.error("考卷id为空");
+        }
+        //考题
+        List<Integer> questionIdList = examPaper.getQuestionIdList();
+        if(CollectionUtils.isEmpty(questionIdList)){
+            LOG.error("修改考卷时,考题不能为空,{}",examPaper.getId());
+            return false;
         }
         //名称
         if(StringUtils.isBlank(examPaper.getName())){
@@ -64,7 +125,33 @@ public class ExamPaperServiceImpl implements ExamPaperService {
             LOG.error("考卷类型为空");
             return false;
         }
-        return examPaperMapper.updateByPrimaryKey(examPaper)>0?true:false;
+        int modifyCounter = examPaperMapper.updateByPrimaryKey(examPaper);
+        if(modifyCounter<1){
+            LOG.error("修改考卷失败,id={},flag={}",examPaper.getId(),modifyCounter);
+            return false;
+        }
+        //删除旧数据
+        boolean isDel = deleteExamInfo(examPaper.getId());
+        if(!isDel){
+            LOG.error("删除考卷考题失败,{}",examPaper.getId());
+            return false;
+        }
+
+        //重新插入
+        return saveQuestionList(questionIdList,examPaper.getId(),true);
+    }
+
+    /**
+     * 删除旧考题
+     * @param examId
+     * @return
+     */
+    private boolean deleteExamInfo(Integer examId){
+        ExamInfoExample examInfoExample = new ExamInfoExample();
+        examInfoExample.createCriteria().andExamIdEqualTo(examId);
+        int delCounter = examInfoMapper.deleteByExample(examInfoExample);
+        LOG.info("删除考卷原有数据共:{}",delCounter);
+        return true;
     }
 
     @Override
@@ -81,7 +168,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
             criteria.andIdEqualTo(examPaperRequest.getId());
         }
         //名称
-        if(examPaperRequest.getName()!=null){
+        if(StringUtils.isNotBlank(examPaperRequest.getName())){
             criteria.andNameLike("*"+examPaperRequest.getName()+"*");
         }
         //类型

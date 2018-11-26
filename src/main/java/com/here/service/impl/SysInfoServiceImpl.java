@@ -5,7 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.here.dao.SysInfoMapper;
 import com.here.entity.SysInfo;
 import com.here.entity.SysInfoExample;
-import com.here.entity.vo.SysInfoRequest;
+import com.here.entity.vo.request.SysInfoRequest;
 import com.here.service.SysInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

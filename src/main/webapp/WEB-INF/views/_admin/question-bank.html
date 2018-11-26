@@ -1,339 +1,344 @@
 <#import "/_admin/lib/sidbar_templet.html" as sidbarTemplet>
 <!DOCTYPE html>
 <html lang="zh-cn">
-
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exam</title>
-
-<!-- Bootstrap -->
-<link href="/static/assets/yeti/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/style.css" />
-<link rel="stylesheet" href="/static/assets/toastr-master/toastr.css" />
-
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
-      <script src="http://cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-</head>
-
-<style>
-  .backs{
-  
-  background: url(/static/img/backs1.jpg);
-  background-size:100%;
-  background-attachment: fixed;
-  }
-  
- .box{
-  box-shadow:0 0 10px #000 !important;
-  }
-   .pad{
-  margin-top:1.5%;
-  margin-left:0.5%;
-  }
-  </style>
-<body class="backs">
-
-<@sidbarTemplet.header />
-
-	<div class="container-fluid box" >
-		<div class="col-xs-2 sidebar box">
-			<ul class="nav nav-sidebar">
-				<@sidbarTemplet.sidbar "question-bank.html" />
-			</ul>
-		</div>
-		<div class="col-xs-10 col-xs-offset-2 content" id="content">
-			<!--content-->
-
-			<div class="panel panel-primary box pad" >
-				<div class="panel-heading">
-					<h2 class="panel-title pull-left" style="line-height: 39px;">题库</h2>
-					<button class="pull-right btn btn-primary" data-toggle="modal"
-						v-on:click="add()">新增题</button>
-					<div class="clearfix"></div>
-				</div>
-				<div class="panel-body">
-					<table class="table table-hover text-center table-bordered">
-						<thead>
-							<tr>
-								<th class="text-center">题干</th>
-								<th class="text-center">选项答案</th>
-								<th class="text-center">试题类型</th>
-								<th class="text-center">正确答案</th>
-								<th class="text-center">操作</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="item in QuestionBankVoList.list">
-								<td v-text="item.title" width="30%"></td>
-								<td v-text="item.options" width="30%"></td>
-								<td v-text="item.type" width="10%"></td>
-								<td v-text="item.answer"></td>
-								<td>
-									<button class="btn btn-xs" v-on:click="update(item)">修改</button>
-									<button class="btn btn-xs" v-on:click="deleteQuestionBank(item.id)">删除</button>
-								</td>
-							</tr>
-                         <tr v-if="QuestionBankVoList.list == 0">
-                             <td colspan="9" align="center"
-                                 style="vertical-align: middle; padding-top: 10px; padding-bottom: 10px;">暂无数据</td>
-                         </tr>
-						</tbody>
-					</table>
-					<div class="pull-right" v-if="QuestionBankVoList.list != 0">
-						<ul class="pagination">
-							<li :class="QuestionBankVoList.isFirstPage? 'disabled':''"><a href="javascript:void(0);" v-on:click="page(QuestionBankVoList.prePage)">&laquo;</a></li>
-							<li v-for="n in QuestionBankVoList.pages" :class="n == QuestionBankVoList.pageNum? 'active':''"><a href="javascript:void(0);" v-on:click="page(n)" v-text="n"></a></li>
-							<li :class="QuestionBankVoList.isLastPage? 'disabled':''"><a href="javascript:void(0);" v-on:click="page(QuestionBankVoList.nextPage)">&raquo;</a></li>
-						</ul>
-					</div>
-				</div>
-			</div>
-
-			<div class="modal fade bs-example-modal-lg" id="myModal">
-				<div class="modal-dialog modal-lg">
-					<div class="modal-content">
-						<div class="modal-header bg-primary">
-							<button type="button" class="close" data-dismiss="modal"
-								aria-hidden="true">&times;</button>
-							<h4 class="modal-title" v-if="btnState == 0">新增考题</h4>
-							<h4 class="modal-title" v-if="btnState == 1">修改考题</h4>
-						</div>
-						<!--添加题-->
-						<div class="modal-body">
-							<form class="form-horizontal" id="optionsForm" action="/admin/addquestionbank" method="post" onsubmit="return mySubmit(true)">
-								<div class="form-group">
-									<label for="firstname" class="col-xs-2 control-label">题干：</label>
-									<div class="col-sm-10">
-										<input type="text" class="form-control" name="stem" v-model="QuestionBank.title" placeholder="请输入题干">
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="lastname" class="col-sm-2 control-label">类型：</label>
-									<div class="col-sm-2">
-										<input id="op-show" v-on:click="show()" type="radio" name="type" value="1" v-model="QuestionBank.type">
-										<label for="op-show" class="">选择题</label>
-									</div>
-									<div class="col-sm-2">
-										<input id="op-hide" v-on:click="hide()" type="radio" name="type" value="4" v-model="QuestionBank.type">判断题&nbsp;&nbsp;
-									</div>
-									<div class="col-sm-2">
-										<input id="op-hide" v-on:click="hide()" type="radio" name="type" value="5" v-model="QuestionBank.type">综合题&nbsp;&nbsp;
-									</div>
-								</div>
-								<div id="options-views">
-								<!-- 开始 -->
-									<div class="form-group">
-										<label for="lastname" class="col-sm-2 control-label">选项：</label>
-										<div class="col-sm-5">
-											<input type="text" class="form-control" v-model="QuestionBank.options['A']" placeholder="请输入A的内容">
-										</div>
-										<div class="col-sm-5">
-											<!--<input type="hidden" v-model="QuestionBank.options[1].op">-->
-											<input type="text" class="form-control" v-model="QuestionBank.options['B']" placeholder="请输入B的内容">
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="lastname" class="col-sm-2 control-label"></label>
-										<div class="col-sm-5">
-											<!--<input type="hidden" v-model="QuestionBank.options[2].op">-->
-											<input type="text" class="form-control" v-model="QuestionBank.options['C']" placeholder="请输入C的内容">
-										</div>
-										<div class="col-sm-5">
-											<input type="text" class="form-control" v-model="QuestionBank.options['D']" placeholder="请输入D的内容">
-										</div>
-									</div>
-								<!-- 结束  放一个对象里面-->
-								</div>
-								<div class="form-group" v-if="QuestionBank.type == 1">
-									<label for="firstname" class="col-xs-2 control-label">正确答案：</label>
-									<div class="col-sm-5">
-										<select class="form-control" v-model="QuestionBank.answer">
-										  <option value="A">A</option>
-										  <option value="B">B</option>
-										  <option value="C">C</option>
-										  <option value="D">D</option>
-										</select>
-										{{QuestionBank.answer}}
-									</div>
-								</div>
-								<div class="form-group" v-if="QuestionBank.type == 4">
-									<label for="firstname" class="col-xs-2 control-label">正确答案：</label>
-									<div class="col-sm-5">
-										<select class="form-control" v-model="QuestionBank.answer">
-										  <option value="0">错误</option>
-										  <option value="1">正确</option>
-										</select>
-										{{QuestionBank.answer}}
-									</div>
-								</div>																
-							</form>
-							<!--end添加题-->
-							<div class="modal-footer">
-								<button type="button" class="btn btn-default" data-dismiss="modal">
-									关闭</button>
-								<button type="button" class="btn btn-primary" v-on:click="addQuestionBank()" v-if="btnState == 0">提交试题</button>
-								<button type="button" class="btn btn-primary" v-on:click="sbUpdate()"  v-if="btnState == 1">修改试题</button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-		</div>
-		<!--content-->
-	</div>
-
-		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-		<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
-		<!-- Include all compiled plugins (below), or include individual files as needed -->
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	    <link href="/static/css/bootstrap-table.min.css" rel="stylesheet">
+	    <!--<link href="../public/static/css/animate.min.css" rel="stylesheet">
+	    <link href="../public/static/css/font-awesome.min.css" rel="stylesheet">-->
+	    <link rel="stylesheet" href="/static/css/bootstrapValidator.min.css"/>
+	    <link rel="stylesheet" href="/static/css/style.css" />
+	    <style>
+	    	.back:hover{cursor: pointer;}
+	    	.fixed-table-toolbar .btn-group>.btn-group:last-child>.btn {
+			    border-top-right-radius: 0px;
+			    border-bottom-right-radius: 0px;
+			}
+			label{width:100px;}
+			.popup_de{
+				background-color:rgba(0,0,0,0.3);
+				width:100%;
+				height: 100%;
+				position:fixed;
+				z-index:999;
+				top:0;
+				left:0;
+				display:none;
+			}
+			.bbox{
+				display: -webkit-box;   /* 老版本语法: Safari, iOS, Android browser, older WebKit browsers. */
+			    display: -moz-box;      /* 老版本语法: Firefox (buggy) */
+			    display: -ms-flexbox;   /* 混合版本语法: IE 10 */   
+				display: -webkit-flex;  /* 新版本语法: Chrome 21+ */
+				display: -moz-flex;
+			    display: flex;          /* 新版本语法: Opera 12.1, Firefox 22+ */
+			}
+			.bbox.xycenter{
+				-moz-box-pack: center; /*Firefox*/
+			    -webkit-box-pack: center; /*Safari,Opera,Chrome*/
+			    box-pack: center;
+			    -moz-justify-content: center;
+			    -webkit-justify-content: center;
+			    justify-content: center;
+				-moz-box-align: center; /*Firefox*/
+			    -webkit-box-align:center; /*Safari,Opera,Chrome*/
+			    box-align: center;
+				-moz-align-items: center;
+			    -webkit-align-items: center;
+				align-items:center;
+			}
+			.popup_de .popup_box{
+				width:300px;
+				height:150px;
+				font-family: '微软雅黑';
+				background-color: #fff;
+				border-radius:5px;
+				color:#333;
+			}
+			.popup_de .popup_btn{
+				display: inline-block;
+				width:100px;
+				height:30px;
+				border-radius: 3px;
+				border:1px solid #1ab394;
+				font-size:15px;
+				text-align: center;
+				line-height: 30px;
+				margin-right:15px;
+				cursor: pointer;
+			}
+			.popup_de .show_msg{
+				display: block;
+				width:100%;
+				text-align: center;
+				font-size:18px;
+				margin-top:40px;
+				margin-bottom: 20px;
+				padding:10px;
+			}
+			.popup_de .popup_close{
+				width:30px;
+				height:30px;
+				font-size:25px;
+				text-align: center;
+				display: inline-block;
+		        cursor:pointer;
+		        float: right;
+		        border-top-right-radius: 5px;
+				line-height:30px;
+			}
+			.popup_de .popup_close:hover{
+				background-color: #1ab394;
+				color:#fff;
+			}
+			.popup_de .btn_submit{
+				background-color: #1ab394;
+				color:#fff;
+			}
+			.popup_de .btn_box{
+				text-align: center;
+			}
+	    </style>
+		<script src="/static/js/jquery.min.js"></script>
 		<script src="/static/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="/static/assets/vue/vue.js"></script>
-		<script type="text/javascript" src="/static/assets/toastr-master/toastr.js"></script>
-		<script type="text/javascript" src="/static/js/common.js"></script>
-		<script>
-			$(function() {
-				var QuestionBank = {
-					title: '',
-					answer: 'A',
-					type: 1,
-					questionBankId: null,
-					options: [{op: 'A', content: ''}, {op: 'B', content: ''}, {op: 'C', content: ''}, {op: 'D', content: ''}],/* 这里 */
-				};
-				var vm = new Vue({
-				  el: '#content',
-				  data: {
-					  QuestionBankVoList: {},
-					  QuestionBank: QuestionBank,
-					  test: "123",
-					  btnState: 0
-				  },
-				  methods: {
-					  addQuestionBank: function() {
-						var temp = JSON.stringify(QuestionBank);
-						console.log(temp);
-						ajaxSubmitJSON("/admin/addquestionbank", JSON.stringify(QuestionBank), 
-									function(data) {
-										if(data) {
-											toastr.success('操作成功!', '新增题');
-											$('#myModal').modal('hide');
-											vm.QuestionBank.stem = '';
-											vm.QuestionBank.answer = 'A';
-											for (var i = 0; i <= 3; i++) {
-												vm.QuestionBank.options[i].content = '';
-											}
-											vm.page(vm.QuestionBankVoList.pageNum);
-										} else {
-											toastr.error('操作失败!', '新增题');
-										}
-									},
-									function(data) {
-										toastr.error('网络错误');
-									}
-							);
-						},
-				  		hide: function() {
-				  			if(this.QuestionBank.answer != 1 || this.QuestionBank.answer!= 0) {
-				  				this.QuestionBank.answer = 1;
-				  				this.QuestionBank.type = 0;
-				  			}
-				  			$("#options-views").hide();
-				  		},
-				  		show: function() {
-				  			if(this.QuestionBank.answer != 'A' || this.QuestionBank.answer!= 'B' || this.QuestionBank.answer!= 'C' || this.QuestionBank.answer!= 'D') {
-				  				this.QuestionBank.answer = 'A';
-				  				this.QuestionBank.testsType = 1;
-				  			}
-				  			$("#options-views").show();
-				  		},
-				  		deleteQuestionBank: function(id) {
-							ajaxSubmitJSON("/admin/deletequestionbank", JSON.stringify({'id': id}),
-									function(data) {
-										if(data) {
-											toastr.success('操作成功!', '删除题');
-											vm.page(vm.QuestionBankVoList.pageNum);
-										}else {
-											toastr.error('操作失败!', '删除题');
-										}
-									},
-									function(data) {
-										toastr.error('网络错误');
-									}
-							);
-						},
-						add: function() {
-							$('#myModal').modal({
-								backdrop: 'static',
-								keyboard: false
-							});
-						},
-						update: function(data) {
-							this.btnState = 1;
-							vm.QuestionBank.stem = data.stem;
-							vm.QuestionBank.answer = data.answer;
-							vm.QuestionBank.testsType = data.testsType;
-							vm.questionBankId = data.questionBankId;
-							if(data.testsType == 1) {
-								vm.QuestionBank.options = data.options;
-							} else {
-								vm.hide();
-							}
-							
-							$('#myModal').modal({
-								backdrop: 'static',
-								keyboard: false
-							});
-						},
-						sbUpdate: function() {
-							console.log(vm.questionBankId);
-							ajaxSubmitJSON("/admin/updatequestionbank-"+vm.questionBankId, JSON.stringify(QuestionBank), 
-									function(data) {
-										if(data) {
-											toastr.success('操作成功!', '修改题');
-											$('#myModal').modal('hide');
-											vm.QuestionBank.stem = '';
-											vm.QuestionBank.answer = 'A';
-											for (var i = 0; i <= 3; i++) {
-												vm.QuestionBank.options[i].content = '';
-											}
-											vm.page(vm.QuestionBankVoList.pageNum);
-										} else {
-											toastr.error('操作失败!', '修改题');
-										}
-									},
-									function(data) {
-										toastr.error('网络错误');
-									}
-							);							
-						},
-						page: function(pageNum) {
-							ajaxSubmitJSON("/admin/getAllQuestionBank", JSON.stringify({'pageNum':pageNum}),
-								function(data) {
-									vm.QuestionBankVoList = data;
-								},
-								function(data) {
-									toastr.error('网络错误');
-								}
-							);
-						}
-				  }
-				});
-				ajaxSubmitJSON("/admin/getAllQuestionBank", JSON.stringify({}),
-					function(data) {
-						vm.QuestionBankVoList = data;
-					},
-					function(data) {
-						toastr.error('网络错误');
-					}
-				);
-			});
-
+		<script src="/static/js/bootstrap-table.min.js"></script>
+		<script src="/static/js/bootstrap-table-zh-CN.js"></script>
+		<script src="/static/js/bootstrapValidator.min.js"></script>
+		<script src="/static/exam/userManagement-bak.js"></script>
+		<script type="text/javascript">
+            function optionChage(val) {
+                console.log('type='+val)
+                if(val!=1){
+                    $("#options-views").hide()
+                } else {
+                    $("#options-views").show()
+                }
+            }
 		</script>
-</body>
-
+	</head>
+	<body class="backs">
+    <@sidbarTemplet.header />
+    <div class="container-fluid box" >
+        <div class="col-xs-2 sidebar box">
+            <ul class="nav nav-sidebar">
+                <@sidbarTemplet.sidbar "question-bank.html" />
+            </ul>
+        </div>
+        <div class="col-xs-10 col-xs-offset-2 content" id="content">
+		<!--分页查询start-->
+		<div class="tableBody">
+			<div class="panel panel-default">
+				<div class="panel-body form-group" style="margin-bottom:0px;">
+					<label class="col-sm-2 control-label" style="text-align: right; margin-top:5px">题目：</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" name="title" id="search_name"/>
+                    </div>
+                    <label class="col-sm-2 control-label" style="text-align: right; margin-top:5px">题型：</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" name="type" id="search_tel"/>
+                    </div>
+                    <div class="col-sm-2 pull-right">
+                    	<button class="btn btn-primary" id="search_btn">查询</button>
+                    </div>
+				</div>
+			</div>
+		  	<table id="mytab" class="table table-hover"></table>
+		  	<div id="toolbar" class="btn-group pull-right" style="margin-right: 20px;">
+	            <button id="btn_edit" type="button" class="btn btn-default" style="display: none; border-radius: 0">
+	                <span class="glyphicon glyphicon-pencil" aria-hidden="true" ></span>修改
+	            </button>
+	            <button id="btn_delete" type="button" class="btn btn-default" style="display: none;">
+	                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
+	            </button>
+	            <button id="btn_add" type="button" class="btn btn-default">
+	                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+	            </button>
+        	</div>
+        </div>
+		<!--分页查询end-->
+		<!--新增题目start-->
+        <div class="addBody" style="width:100%; display: none;position: absolute;top:10px">
+        	<div class="col-sm-12">
+        		<div class="ibox float-e-margins">
+        			<div class="ibox-title">
+	                    <h5>新增考题</h5>
+	                </div>
+	                <div class="ibox-content">
+						<!--新增表单start-->
+		                <form id="addForm" method="post" class="form-horizontal" action="target.php">
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">题干</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="title" id="add_Title"/>
+		                        </div>
+		                    </div>
+		                    <div class="hr-line-dashed"></div>
+		                    <div class="hr-line-dashed" style="display:none"></div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">类型：</label>
+								<div class="col-sm-2">
+									<label>
+									<input id="op-show"  type="radio" name="type" value="1" onchange="optionChage(this.value)" checked />
+									选择题
+									</label>
+									<label>
+									<input  type="radio" name="type" value="4" onchange="optionChage(this.value)"/>
+									判断题&nbsp;&nbsp;
+									</label>
+									<label>
+									<input id="op-hide" type="radio" name="type" value="5" onchange="optionChage(this.value)" />
+									综合题&nbsp;&nbsp;
+									</label>
+								</div>
+							</div>
+							<div id="options-views">
+								<div class="form-group">
+									<label class="col-sm-2 control-label">选项:</label>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入A的内容">
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入B的内容">
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入C的内容">
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入D的内容">
+									</div>
+								</div>
+							</div>
+							<div class="hr-line-dashed"></div>
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">正确答案:</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="answer" id="add_Answer"/>
+		                        </div>
+		                    </div>
+		                    <div class="hr-line-dashed"></div>
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">问题分析</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="analysis" id="add_Analysis"/>
+		                        </div>
+		                    </div>
+		                    <div class="hr-line-dashed"></div>
+		                    <div class="form-group">
+		                        <div class="col-sm-2 col-sm-offset-2">
+		                            <button type="button" class="btn btn-primary btn-block"  id="add_saveBtn">保存</button>
+		                        </div>
+		                        <div class="col-sm-2 col-sm-offset-1">
+		                            <button type="button" class="btn btn-default btn-block"  id="add_backBtn">返回</button>
+		                        </div>
+		                    </div>
+		                </form>
+						<!--新增表单end-->
+		             </div>
+		          </div>
+		       </div>
+		    </div>
+		<!--新增题目end-->
+		<!--修改题目start-->
+		<div class="changeBody" style="width:100%; height:500px; display: none;position: absolute;top:10px;">
+        	<div class="col-sm-12">
+        		<div class="ibox float-e-margins">
+        			<div class="ibox-title">
+	                    <h5>修改考题信息</h5>
+	                </div>
+	                <div class="ibox-content">
+		                <form id="editForm" method="post" class="form-horizontal">
+		                 	<div class="form-group" style="display:none" >
+		                 		<label class="col-sm-2 control-label">ID</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="id" id="edit_Id"/>
+		                        </div>
+		                 	</div>
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">题目</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="title" id="edit_Title" readonly/>
+		                        </div>
+		                    </div>
+		                    <div class="hr-line-dashed"></div>
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">答案</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="answer" id="edit_Answer"/>
+		                        </div>
+		                    </div>
+		                    <div class="hr-line-dashed" style="display:none"></div>
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">分析</label>
+		                        <div class="col-sm-10">
+		                            <input type="text" class="form-control" name="analysis" id="edit_Analysis"/>
+		                        </div>
+		                    </div>
+		                    <div class="hr-line-dashed"></div>
+		                    <div class="form-group">
+		                        <label class="col-sm-2 control-label">类型</label>
+		                        <div class="col-sm-10">
+		                            <label>
+		                                <input type="radio" name="type" value="1"  id="edit_Type1"/> 单选
+		                            </label>
+		                            <label>
+		                                <input type="radio" name="type" value="2" id="edit_Type2"/> 多选
+		                            </label>
+									<label>
+										<input type="radio" name="type" value="3" id="edit_Type3" />填空
+									</label>
+									<label>
+										<input type="radio" name="type" value="4" id="edit_Type4" />判断
+									</label>
+									<label>
+										<input type="radio" name="type" value="5" id="edit_Type5" />综合
+									</label>
+		                        </div>
+		                    </div>
+							<div id="options-edit">
+								<div class="form-group">
+									<label class="col-sm-2 control-label">选项:</label>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入A的内容">
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入B的内容">
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入C的内容">
+									</div>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" name="optionList" placeholder="请输入D的内容">
+									</div>
+								</div>
+							</div>
+		                    <div class="hr-line-dashed"></div>
+		                    <div class="form-group">
+		                        <div class="col-sm-2 col-sm-offset-2">
+		                            <button type="button" class="btn btn-primary btn-block"  id="edit_saveBtn">保存</button>
+		                        </div>
+		                        <div class="col-sm-2 col-sm-offset-1">
+		                            <button type="button" class="btn btn-default btn-block"  id="edit_backBtn">返回</button>
+		                        </div>
+		                    </div>
+		                </form>
+	                </div>
+        		</div>
+            </div>
+		</div>
+		<!--修改题目end-->
+		<div class="popup_de xycenter">
+			<div class="popup_box">
+				<span class="popup_close" value="关闭">×</span>
+			    <span class="show_msg">确定要删除该权限吗？</span>
+			    <div class="btn_box">
+				    <div class="popup_btn btn_submit" value="确定">确定</div>
+					<div class="popup_btn btn_cancel" value="取消">取消</div>
+			    </div>
+			</div>	
+		</div>
+        </div>
+    </div>
+	</body>
 </html>

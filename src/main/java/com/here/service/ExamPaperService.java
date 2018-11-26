@@ -2,7 +2,7 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamPaper;
-import com.here.entity.vo.ExamPaperRequest;
+import com.here.entity.vo.request.ExamPaperRequest;
 
 public interface ExamPaperService {
     /**

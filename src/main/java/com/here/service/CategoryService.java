@@ -38,7 +38,7 @@ public interface CategoryService {
      * @param category
      * @return
      */
-    boolean saveCategory(Category category);
+    Integer saveCategory(Category category);
 
     /**
      * 修改类别-只能修改名称
@@ -53,4 +53,11 @@ public interface CategoryService {
      * @return
      */
     boolean deleteCategory(Integer id);
+
+    /**
+     * 级联查询所有子类
+     * @param id
+     * @return
+     */
+    List<Category> getAllCategory(Integer id);
 }

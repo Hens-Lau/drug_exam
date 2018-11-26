@@ -5,7 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.here.dao.ScoreMapper;
 import com.here.entity.Score;
 import com.here.entity.ScoreExample;
-import com.here.entity.vo.ScoreRequest;
+import com.here.entity.vo.request.ScoreRequest;
 import com.here.service.ScoreService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

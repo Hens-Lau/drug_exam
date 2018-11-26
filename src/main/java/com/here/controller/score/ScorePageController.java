@@ -2,7 +2,7 @@ package com.here.controller.score;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.Score;
-import com.here.entity.vo.ScoreRequest;
+import com.here.entity.vo.request.ScoreRequest;
 import com.here.service.ScoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class ScorePageController {
         //查询成绩列表
         List<Score> scoreList = getScoreList();
         mav.addObject("listScore",scoreList);
-        mav.setViewName("_admin/score");
+        mav.setViewName("_admin/scoreList");
         return mav;
     }
 

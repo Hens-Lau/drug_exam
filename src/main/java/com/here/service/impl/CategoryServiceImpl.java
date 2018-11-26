@@ -77,30 +77,31 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public boolean saveCategory(Category category) {
+    public Integer saveCategory(Category category) {
         if(category==null || category.getParent()==null){
             LOG.error("父类不能为空");
-            return false;
+            return null;
         }
         if(StringUtils.isBlank(category.getName())){
             LOG.error("类别名称不能为空");
-            return false;
+            return null;
         }
         //查询父类id
-        Category parentCat = getParent(category.getParent());
+        Category parentCat = getCategoryById(category.getParent());
         if(parentCat==null){
             LOG.error("没有找到父节点");
-            return false;
+            return null;
         }
         int id = categoryMapper.insertSelective(category);
         if(id<1){
             LOG.error("新增类别失败");
-            return false;
+            return null;
         }
         Category updateCat = new Category();
         updateCat.setId(id);
         updateCat.setSequence(parentCat.getSequence()+id);
-        return categoryMapper.updateByPrimaryKeySelective(updateCat)>0?true:false;
+        categoryMapper.updateByPrimaryKeySelective(updateCat);
+        return id;
     }
 
     @Override
@@ -112,12 +113,17 @@ public class CategoryServiceImpl implements CategoryService {
         Category mCat = new Category();
         mCat.setId(category.getId());
         mCat.setName(category.getName());
-        return categoryMapper.updateByPrimaryKey(mCat)>0?true:false;
+        return categoryMapper.updateByPrimaryKeySelective(mCat)>0?true:false;
     }
 
     @Override
     public boolean deleteCategory(Integer id) {
         return categoryMapper.deleteByPrimaryKey(id)>0?true:false;
+    }
+
+    @Override
+    public List<Category> getAllCategory(Integer id) {
+        return categoryMapper.getAllCategory(id);
     }
 
     private Category getParent(Integer parentId){
@@ -129,5 +135,9 @@ public class CategoryServiceImpl implements CategoryService {
             return null;
         }
         return parentList.get(0);
+    }
+
+    private Category getCategoryById(Integer id){
+        return categoryMapper.selectByPrimaryKey(id);
     }
 }

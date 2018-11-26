@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.here.dao.UserInfoMapper;
 import com.here.entity.UserInfo;
 import com.here.entity.UserInfoExample;
-import com.here.entity.vo.UserRequest;
+import com.here.entity.vo.request.UserRequest;
 import com.here.service.UserInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

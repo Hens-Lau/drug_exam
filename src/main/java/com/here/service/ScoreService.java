@@ -2,7 +2,7 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.Score;
-import com.here.entity.vo.ScoreRequest;
+import com.here.entity.vo.request.ScoreRequest;
 
 public interface ScoreService {
     /**
