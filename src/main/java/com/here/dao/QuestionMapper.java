@@ -118,4 +118,10 @@ public interface QuestionMapper {
      * @mbg.generated Mon Oct 15 11:20:36 CST 2018
      */
     int updateByPrimaryKey(Question record);
+
+    /**
+     * 查询所有问题id
+     * @return
+     */
+    List<Integer> selectQuestionIds();
 }

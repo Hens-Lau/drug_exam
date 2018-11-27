@@ -6,6 +6,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.here.dao.ExamInfoMapper;
 import com.here.dao.ExamPaperMapper;
+import com.here.dao.QuestionMapper;
 import com.here.entity.ExamInfo;
 import com.here.entity.ExamInfoExample;
 import com.here.entity.ExamPaper;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -29,11 +31,16 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     @Autowired
     private ExamPaperMapper examPaperMapper;
     @Autowired
+    private QuestionMapper questionMapper;
+    @Autowired
     private ExamInfoMapper examInfoMapper;
 
     @Override
     public boolean saveExamPaper(ExamPaper examPaper) {
         List<Integer> questionIdList = examPaper.getQuestionIdList();
+        if(CollectionUtils.isEmpty(questionIdList)){
+            questionIdList = getRandomQuestion(20);
+        }
         if(CollectionUtils.isEmpty(questionIdList)){
             LOG.error("考题不能为空");
             return false;
@@ -66,6 +73,25 @@ public class ExamPaperServiceImpl implements ExamPaperService {
             return false;
         }
         return saveQuestionList(questionIdList,examId);
+    }
+
+    /**
+     * 随机选取考题
+     * @param size
+     * @return
+     */
+    private List<Integer> getRandomQuestion(int size){
+        List<Integer> idList = Lists.newArrayList();
+        List<Integer> questionList = questionMapper.selectQuestionIds();
+        if (questionList.size() < size ) {
+            LOG.error("没有找到有效考题");
+            return idList;
+        }
+        Collections.shuffle(questionList);
+        for(int i=0;i<size;i++){
+            idList.add(questionList.get(i));
+        }
+        return idList;
     }
 
     /**

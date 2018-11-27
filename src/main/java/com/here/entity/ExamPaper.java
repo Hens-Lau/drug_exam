@@ -1,5 +1,7 @@
 package com.here.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +41,8 @@ public class ExamPaper {
      *
      * @mbg.generated Sat Oct 20 17:11:30 CST 2018
      */
+
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date startTime;
 
     /**
@@ -48,6 +52,7 @@ public class ExamPaper {
      *
      * @mbg.generated Sat Oct 20 17:11:30 CST 2018
      */
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date endTime;
 
     /**
