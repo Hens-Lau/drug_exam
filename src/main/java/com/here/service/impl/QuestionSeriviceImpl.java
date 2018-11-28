@@ -1,19 +1,34 @@
 package com.here.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.here.dao.QuestionMapper;
+import com.here.entity.Question;
 import com.here.entity.QuestionExample;
 import com.here.entity.QuestionWithBLOBs;
 import com.here.entity.vo.request.QuestionRequest;
 import com.here.service.QuestionService;
+import com.here.utils.PoiUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -94,5 +109,164 @@ public class QuestionSeriviceImpl implements QuestionService {
         QuestionExample.Criteria criteria = example.createCriteria();
         criteria.andIdIn(questionIdList);
         return questionMapper.deleteByExample(example)>0?true:false;
+    }
+
+    public String importQuestion(String fileName, MultipartFile mFile){
+        String tempFilePath = "./temp/";
+        File uploadDir = new File(tempFilePath);
+        if(!uploadDir.exists()){
+            uploadDir.mkdirs();
+        }
+        File tempFile = new File(tempFilePath+fileName+"_"+new Date().getTime()+".xlsx");
+        InputStream is = null;
+        try {
+            mFile.transferTo(tempFile);
+            is = new FileInputStream(tempFile);
+            Workbook wb = null;
+            if(PoiUtils.isExcel2003(fileName)){
+                wb = new HSSFWorkbook(is);
+            } else if(PoiUtils.isExcel2007(fileName)){
+                wb = new XSSFWorkbook(is);
+            } else {
+                LOG.error("上传的文件格式错误,{}",fileName);
+                return "导入的excel错误!";
+            }
+            String singleError = readForSingleQuestion(wb);
+            String multiError = readForMultiQuestion(wb);
+            StringBuffer totalError = new StringBuffer();
+            if(StringUtils.isNotBlank(singleError)){
+                totalError.append("单选题错误:").append(singleError);
+            }
+            if(StringUtils.isNotBlank(multiError)){
+                totalError.append("多选题错误:").append(multiError);
+            }
+            return totalError.toString();
+        } catch (IOException e) {
+            LOG.error("上传excel异常",e);
+        }
+        return null;
+    }
+
+    /**
+     * 处理单选题
+     * @param workbook
+     * @return
+     */
+    private String readForSingleQuestion(Workbook workbook){
+        StringBuffer errorMsg = new StringBuffer();
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getPhysicalNumberOfRows();
+        if(totalRows<2){
+            errorMsg.append("单选题信息缺失");
+            return errorMsg.toString();
+        }
+        //读取单选内容
+        List<QuestionWithBLOBs> list = train2Entity(sheet,totalRows,errorMsg,true);
+        for(QuestionWithBLOBs questionWithBLOBs: list){
+            questionMapper.insertSelective(questionWithBLOBs);
+        }
+        LOG.info("共导入单选题:{}道",list.size());
+        return errorMsg.toString();
+    }
+
+
+    private List<QuestionWithBLOBs> train2Entity(Sheet sheet,int totalRows,StringBuffer errorMsg,boolean isSingleQuestion){
+        List<QuestionWithBLOBs> list = Lists.newArrayList();
+        for(int i=1;i<totalRows;i++){
+            Row row = sheet.getRow(i);
+            if(row==null){
+//                errorMsg.append("第").append(i+1).append("行数据为空!");
+                LOG.error("导入的第{}行数据为空,题型:{}",i+1,isSingleQuestion);
+                continue;
+            } else {
+                QuestionWithBLOBs questionWithBLOBs = trans2Entity(row,isSingleQuestion);
+                if(questionWithBLOBs==null){
+                    LOG.error("导入的第{}行为空白数据,题型:{}",i+1,isSingleQuestion);
+                    continue;
+                } else if(StringUtils.isBlank(questionWithBLOBs.getTitle())) {
+                    errorMsg.append("第").append(i+1).append("行数据题干错误!");
+                    continue;
+                }
+                list.add(questionWithBLOBs);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 转换成考题
+     * @param row
+     * @param isSingleQuestion
+     * @return
+     */
+    private QuestionWithBLOBs trans2Entity(Row row, boolean isSingleQuestion){
+        QuestionWithBLOBs question = new QuestionWithBLOBs();
+        StringBuffer line = new StringBuffer();
+        //题干
+        String title = PoiUtils.getCellStringValue(row.getCell(0));
+        question.setTitle(title);
+        line.append(title);
+        //答案
+        String answer = PoiUtils.getCellStringValue(row.getCell(1));
+        question.setAnswer(answer);
+        line.append(answer);
+        //A选项
+        String options1 = PoiUtils.getCellStringValue(row.getCell(2));
+        options1 = StringUtils.replaceOnce(options1,"A.","");
+        line.append(options1);
+        //B选项
+        String option2 = PoiUtils.getCellStringValue(row.getCell(3));
+        option2 = StringUtils.replaceOnce(option2,"B.","");
+        line.append(option2);
+        //C选项
+        String option3 = PoiUtils.getCellStringValue(row.getCell(4));
+        option3 = StringUtils.replaceOnce(option3,"C.","");
+        line.append(option3);
+        //D选项
+        String option4 = PoiUtils.getCellStringValue(row.getCell(5));
+        option4 = StringUtils.replaceOnce(option4,"D.","");
+        line.append(option4);
+        if(StringUtils.isBlank(line)){
+            LOG.error("导入的数据包括空白行");
+            return null;
+        }
+        if(StringUtils.isBlank(title)){
+            LOG.error("题干为空,{}",isSingleQuestion);
+            return question;
+        }
+        JSONObject obj = new JSONObject();
+        obj.put("A",options1);
+        obj.put("B",option2);
+        obj.put("C",option3);
+        obj.put("D",option4);
+        question.setOptions(obj.toJSONString());
+        if(isSingleQuestion){
+            question.setType(new Short("1"));
+        } else {
+            question.setType(new Short("2"));
+        }
+        return question;
+    }
+
+    /**
+     * 处理多选题
+     * @param wb
+     * @return
+     */
+    private String readForMultiQuestion(Workbook wb){
+        StringBuffer errorMsg = new StringBuffer();
+        Sheet sheet = wb.getSheetAt(1);
+        int totalRows = sheet.getPhysicalNumberOfRows();
+        if(totalRows<2){
+            errorMsg.append("多选题信息缺失");
+            return errorMsg.toString();
+        }
+        //读取多选题
+        List<QuestionWithBLOBs> list = train2Entity(sheet,totalRows,errorMsg,false);
+        for(QuestionWithBLOBs questionWithBLOBs: list){
+            questionMapper.insertSelective(questionWithBLOBs);
+        }
+        LOG.info("共导入多选题:{}道",list.size());
+        return errorMsg.toString();
     }
 }

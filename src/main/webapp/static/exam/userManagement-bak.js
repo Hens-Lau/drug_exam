@@ -329,6 +329,29 @@ $(function(){
             $("#options-edit").hide()
         }
     })
+	//	excel导入
+	$('#fileImport').fileinput({
+		language:'zh',
+		uploadUrl:'/admin/importQuestion',
+		allowedFileExtensions:['xls','xlsx','XLS','XLSX'],
+		showUpload:true,
+		showCaption:false,
+		showPreview:true,
+		maxFileCount:1,
+		enctype:'multipart/form-data',
+		validateInitialCount:true,
+		browseClass:'btn btn-primary',
+		previewFileIcon:"<i class='glyphicon glyphicon-king'></i>",
+		msgFilesTooMany:"选择上传的文件数量({n}) 超过允许的最大数值{m}!"
+
+	}).on('fileuploaded',function (event,data) {
+		console.log('data='+JSON.stringify(data))
+		if(data.response.errorCode==0){
+			$('#file_errors').html("成功导入! "+data.response.data)
+		}
+
+		// $('#fileModal').modal('hide')
+    })
 })
 function tableHeight() {
     return $(window).height() - 140;

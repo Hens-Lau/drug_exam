@@ -3,6 +3,7 @@ package com.here.service;
 import com.github.pagehelper.PageInfo;
 import com.here.entity.QuestionWithBLOBs;
 import com.here.entity.vo.request.QuestionRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,4 +35,12 @@ public interface QuestionService {
      * @return
      */
     boolean deleteQuestion(List<Integer> questionIdList);
+
+    /**
+     * 导入考题
+     * @param fileName
+     * @param mFile
+     * @return
+     */
+    String importQuestion(String fileName, MultipartFile mFile);
 }

@@ -2,22 +2,19 @@ package com.here.controller.question;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
-import com.here.entity.Question;
 import com.here.entity.QuestionWithBLOBs;
 import com.here.entity.vo.request.QuestionRequest;
+import com.here.entity.vo.response.BaseResponse;
 import com.here.service.QuestionService;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -73,6 +70,14 @@ public class QuestionDataController {
             return false;
         }
         return questionService.deleteQuestion(question.getIdList());
+    }
+
+    @RequestMapping(value = "/admin/importQuestion")
+    @ResponseBody
+    public BaseResponse importQuestion(@RequestParam(value = "filename")MultipartFile file, HttpServletRequest request, HttpServletResponse response){
+        String fileName = file.getOriginalFilename();
+        String message = questionService.importQuestion(fileName,file);
+        return BaseResponse.newResponseInstance(message);
     }
 
     private String trans2Json(List<String> optionList){

@@ -10,6 +10,7 @@
 	    <link href="../public/static/css/font-awesome.min.css" rel="stylesheet">-->
 	    <link rel="stylesheet" href="/static/css/bootstrapValidator.min.css"/>
 	    <link rel="stylesheet" href="/static/css/style.css" />
+		<link rel="stylesheet" href="/static/css/fileinput.min.css" />
 	    <style>
 	    	.back:hover{cursor: pointer;}
 	    	.fixed-table-toolbar .btn-group>.btn-group:last-child>.btn {
@@ -106,6 +107,8 @@
 		<script src="/static/js/bootstrap-table.min.js"></script>
 		<script src="/static/js/bootstrap-table-zh-CN.js"></script>
 		<script src="/static/js/bootstrapValidator.min.js"></script>
+		<script src="/static/js/fileinput.min.js"></script>
+		<script src="/static/js/fileinput-zh.js"></script>
 		<script src="/static/exam/userManagement-bak.js"></script>
 		<script type="text/javascript">
             function optionChage(val) {
@@ -142,8 +145,37 @@
                     <div class="col-sm-2 pull-right">
                     	<button class="btn btn-primary" id="search_btn">查询</button>
                     </div>
+					<div class="col-sm-2">
+						<button class="btn btn-default" data-toggle="modal" data-target="#fileModal">导入</button>
+					</div>
 				</div>
 			</div>
+			<!--文件上传控件-->
+			<div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="fileModalLabel" aria-hidden="true">
+				<div class="modal-dialog modal-lg" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="fileModalLabel">导入考题</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="file-loading">
+								<input id="fileImport" name="filename" multiple type="file">
+							</div>
+							<div id="file_errors" class="alert alert-success alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert"></button>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+							<!--<button type="button" class="btn btn-primary" title="点击上传">Save</button>-->
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--文件上传控件结束-->
 		  	<table id="mytab" class="table table-hover"></table>
 		  	<div id="toolbar" class="btn-group pull-right" style="margin-right: 20px;">
 	            <button id="btn_edit" type="button" class="btn btn-default" style="display: none; border-radius: 0">
