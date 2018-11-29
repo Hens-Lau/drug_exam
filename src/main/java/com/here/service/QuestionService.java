@@ -2,9 +2,11 @@ package com.here.service;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.QuestionWithBLOBs;
+import com.here.entity.vo.ReportInternalException;
 import com.here.entity.vo.request.QuestionRequest;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface QuestionService {
@@ -43,4 +45,11 @@ public interface QuestionService {
      * @return
      */
     String importQuestion(String fileName, MultipartFile mFile);
+
+    /**
+     * 根据查询条件导出考题
+     * @param questionRequest
+     * @return
+     */
+    String exportQuestion(QuestionRequest questionRequest) throws ReportInternalException, IOException;
 }

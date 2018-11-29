@@ -352,6 +352,36 @@ $(function(){
 
 		// $('#fileModal').modal('hide')
     })
+
+    // //导出按钮
+    // $('#btn_export').on('click',function () {
+	// 	params = {title:$('#search_name').val(), type:$('#search_tel').val()}
+	// 	$.ajax({
+    //         url:'/admin/exportQuestion',method:'get', data:params, responseType:'blob',success:function(data) {
+    //             // alert('data loaded:'+data)
+    //             var BOM = '\uFEFF'
+    //             if (window.Blob && window.URL && window.URL.createObjectURL) {
+    //                 var csvData = new Blob([BOM + data], {type: 'application/vnd.ms-excel'})
+    //                 var link = document.createElement('a')
+    //                 link.download = '考题.xlsx'
+    //                 link.href = URL.createObjectURL(csvData)
+    //                 link.target = '_blank'
+    //                 document.body.appendChild(link)
+    //                 link.click()
+    //                 document.body.removeChild(link)
+    //             } else {
+    //                 var link = document.createElement('a')
+    //                 link.download = '考题2.xlsx'
+    //                 link.href = 'data:attachment/xls;charset=utf-8,' + BOM + encodeURIComponent(data)
+    //                 link.target = '_blank'
+    //                 document.body.appendChild(link)
+    //                 link.click()
+    //                 document.body.removeChild(link)
+    //             }
+    //         }
+    //     })
+    // })
+
 })
 function tableHeight() {
     return $(window).height() - 140;
@@ -376,3 +406,10 @@ $.fn.serializeObject = function() {
     }
     return o;
 };
+
+function exportData() {
+    var title=$('#search_name').val()
+    var type=$('#search_tel').val()
+    var url = '/admin/exportQuestion?title='+title+'&type='+type
+    window.location=url
+}

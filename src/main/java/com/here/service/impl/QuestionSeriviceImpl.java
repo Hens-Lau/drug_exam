@@ -3,13 +3,16 @@ package com.here.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.here.dao.QuestionMapper;
 import com.here.entity.Question;
 import com.here.entity.QuestionExample;
 import com.here.entity.QuestionWithBLOBs;
+import com.here.entity.vo.ReportInternalException;
 import com.here.entity.vo.request.QuestionRequest;
 import com.here.service.QuestionService;
+import com.here.utils.Excel2007Utils;
 import com.here.utils.PoiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -34,6 +37,7 @@ import java.util.List;
 @Service
 public class QuestionSeriviceImpl implements QuestionService {
     private final static Logger LOG = LoggerFactory.getLogger(QuestionSeriviceImpl.class);
+    private final static String TEMP_PATH = "./temp/export/";
     @Autowired
     private QuestionMapper questionMapper;
 
@@ -112,7 +116,7 @@ public class QuestionSeriviceImpl implements QuestionService {
     }
 
     public String importQuestion(String fileName, MultipartFile mFile){
-        String tempFilePath = "./temp/";
+        String tempFilePath = "./temp/import/";
         File uploadDir = new File(tempFilePath);
         if(!uploadDir.exists()){
             uploadDir.mkdirs();
@@ -143,8 +147,128 @@ public class QuestionSeriviceImpl implements QuestionService {
             return totalError.toString();
         } catch (IOException e) {
             LOG.error("上传excel异常",e);
+        } finally {
+            if(is != null){
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    LOG.error("关闭导入文件异常",e);
+                }
+            }
         }
         return null;
+    }
+
+    @Override
+    public String exportQuestion(QuestionRequest questionRequest) throws ReportInternalException, IOException {
+        //根据条件查询结果
+        List<QuestionWithBLOBs> questionList = queryQuestionList(questionRequest);
+        //将结果转换为Object集合
+        List<List<Object>> exportData = Lists.transform(questionList, new Function<QuestionWithBLOBs, List<Object>>() {
+            @Override
+            public List<Object> apply(QuestionWithBLOBs question) {
+                return trans2Columns(question);
+            }
+        });
+        //导出excel
+        List<String> columnNames = getColumnNames();
+        String fileName = System.currentTimeMillis()+"";
+        String sheetName = "考题";
+        String excelTitle = "佛山第一中学戒毒考题";
+        Excel2007Utils.writeExcel(TEMP_PATH,fileName,sheetName,columnNames,excelTitle,exportData,false);
+        //返回excel路径
+        return TEMP_PATH+fileName+".xlsx";
+    }
+
+    /**
+     * 导出的列名
+     * @return
+     */
+    private List<String> getColumnNames(){
+        List<String> colNames = Lists.newArrayList();
+        colNames.add("题型");
+        colNames.add("题目");
+        colNames.add("答案");
+        colNames.add("选项A");
+        colNames.add("选项B");
+        colNames.add("选项C");
+        colNames.add("选项D");
+        return colNames;
+    }
+
+    /**
+     * 将对象转换成列
+     * @param question
+     * @return
+     */
+    private List<Object> trans2Columns(QuestionWithBLOBs question){
+        List<Object> colList = Lists.newArrayList();
+        //题型
+        Short type = question.getType();
+        String typeName = null;//1:单选,2:多选,3:填空,4:判断,5:综合
+        if(type==null){
+            typeName="未知";
+        } else if(type.intValue()==1){
+            typeName="单选";
+        } else if(type.intValue()==2){
+            typeName="多选";
+        } else if(type.intValue()==3){
+            typeName="填空";
+        } else if(type.intValue()==4){
+            typeName="判断";
+        } else if(type.intValue()==5){
+            typeName="综合";
+        } else {
+            typeName="其他-"+type;
+        }
+        colList.add(typeName);
+        //题目
+        String title = question.getTitle();
+        colList.add(title);
+        //答案
+        String answer = question.getAnswer();
+        colList.add(answer);
+        //拆解选项
+        String option = (String) question.getOptions();
+        if(StringUtils.isBlank(option)){
+            colList.add("");
+            colList.add("");
+            colList.add("");
+            colList.add("");
+        } else {
+            JSONObject obj = JSONObject.parseObject(option);
+            colList.add(obj.get("A"));
+            colList.add(obj.get("B"));
+            colList.add(obj.get("C"));
+            colList.add(obj.get("D"));
+        }
+        return colList;
+    }
+
+    /**
+     * 查询需要导出的数据
+     * @param questionRequest
+     * @return
+     */
+    private List<QuestionWithBLOBs> queryQuestionList(QuestionRequest questionRequest){
+        QuestionExample example = new QuestionExample();
+        QuestionExample.Criteria criteria = example.createCriteria();
+        if(questionRequest.getPageId()!=null){//编号
+            criteria.andIdEqualTo(questionRequest.getPageId());
+        }
+        if(questionRequest.getCategoryId()!=null) {//问题类别
+            criteria.andCatIdEqualTo(questionRequest.getCategoryId());
+        }
+        //问题关键字
+        if(questionRequest.getLevel()!=null){
+            criteria.andLevelEqualTo(questionRequest.getLevel().shortValue());
+        }
+        //问题类型
+        if(questionRequest.getType()!=null){
+            criteria.andTypeEqualTo(questionRequest.getType().shortValue());
+        }
+        List<QuestionWithBLOBs> questionWithBLOBsList = questionMapper.selectByExampleWithBLOBs(example);
+        return questionWithBLOBsList;
     }
 
     /**

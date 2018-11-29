@@ -3,18 +3,26 @@ package com.here.controller.question;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.here.entity.QuestionWithBLOBs;
+import com.here.entity.vo.ReportInternalException;
 import com.here.entity.vo.request.QuestionRequest;
 import com.here.entity.vo.response.BaseResponse;
 import com.here.service.QuestionService;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -78,6 +86,17 @@ public class QuestionDataController {
         String fileName = file.getOriginalFilename();
         String message = questionService.importQuestion(fileName,file);
         return BaseResponse.newResponseInstance(message);
+    }
+
+    @RequestMapping(value = "/admin/exportQuestion")
+    public ResponseEntity<byte[]> exportQuestion(HttpServletRequest request, QuestionRequest questionRequest) throws IOException, ReportInternalException {
+        String filePath = questionService.exportQuestion(questionRequest);
+        File file = new File(filePath);
+        HttpHeaders headers = new HttpHeaders();
+        String downName = new String("考题.xlsx".getBytes("UTF-8"),"iso-8859-1");
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment",downName);
+        return new ResponseEntity<>(FileUtils.readFileToByteArray(file),headers, HttpStatus.CREATED);
     }
 
     private String trans2Json(List<String> optionList){
