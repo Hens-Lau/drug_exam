@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/css/sweetalert2.min.css" />
+    <script src="/static/js/sweetalert2.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrapValidator.min.js"></script>
+
+</head>
+<body>
+<form id="reg_form" class="form-horizontal" role="form" action="/admin/addUser" style="padding: 30px 100px 10px;">
+    <fieldset>
+        <legend>新用户注册</legend>
+    </fieldset>
+    <div class="form-group">
+        <label for="studentNo" class="col-sm-2 control-label">学号:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control text-danger" id="studentNo" name="studentNo">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="password" class="col-sm-2 control-label text-muted">密码:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="password" name="password">
+        </div>
+        <div style="display: inline">
+            <label class="help-block">6-16位字母，数字，符号，区分大小写</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="conpsw" class="col-sm-2 control-label text-muted">重复密码:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="conpsw">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="name" class="col-sm-2 control-label text-muted">姓名:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="name" name="name">
+        </div>
+        <div style="display: inline">
+            <label class="help-block">(请输入真实姓名)</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label text-muted">用户角色:</label>
+        <select class="col-lg-1 input-sm" id="role" name="role" style="margin-left:15px">
+            <option value="4">学生</option>
+            <option value="3">老师</option>
+            <option value="2">管理员</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="grade" class="col-sm-2 control-label">年级:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="grade" name="grade" placeholder="数字形式">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="optionsRadios1" class="col-sm-2 control-label">性别:</label>
+        <div class="col-sm-4">
+            <input type="radio" name="optionRadios" id="optionsRadios1" value="option1" checked>男&nbsp;&nbsp;
+            <input type="radio" name="optionRadios" id="optionsRadios2" value="option2">女
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="mobile" class="col-sm-2 control-label text-muted">电话:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="mobile" name="mobile">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="email" class="col-sm-2 control-label">邮箱:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="email" name="email">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="note" class="col-sm-2 control-label">备注:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" id="note" name="note">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-3">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox">我已阅读并接受<a href="#">注册条款</a>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-4">
+            <button type="submit" class="btn btn-warning" style="width: 340px;">立即注册</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $('#reg_form').bootstrapValidator({
+            message:'信息不符合规范',
+            feedbackIcons:{
+                valid:'glyphicon glyphicon-ok',
+                invalid:'glyphicon glyphicon-remove',
+                validating:'glyphicon glyphicon-refresh'
+            },
+            fields:{
+                studentNo:{
+                    message:'学号验证失败',
+                    validators:{
+                        notEmpty:{
+                            message:'学号不能为空'
+                        },
+                        threshold:5,
+                        remote:{
+                            message:'学号已使用! 请选择其他学号，或联系管理员找回密码!',
+                            url:'/admin/validate',
+                            // delay:3000,
+                            type:'POST'
+                        }
+                    }
+                },
+                password:{
+                    message:'密码验证失败',
+                    validators:{
+                        notEmpty:{
+                            message:'密码不能为空'
+                        },
+                        stringLength:{
+                            min:6,
+                            max:18,
+                            message:'密码长的必须在6到18位之间'
+                        },
+                        regexp:{
+                            regexp:/^[a-zA-Z0-9_]+$/,
+                            message:'用户名只能包含大写，小写，数字'
+                        }
+                    }
+                }
+
+            }
+        }).on('success.form.bv',function (e) {
+            //prevent form submission
+            e.preventDefault()
+            //get the form instance
+            var $form = $(e.target)
+            console.log('form:'+$form)
+            //get the bootstrapValidator intance
+            var bv = $form.data('bootstrapValidator')
+            //use ajax to submit form data
+            $.post($form.attr('action'),$form.serialize(),function (data) {
+                if(data){
+                    swal({
+                        title:'注册成功!',
+                        text:'管理员审核后，账号才能政策使用',
+                        imageUrl:'/static/img/thumbs-up.jpg',
+                        timer:30000
+                    }).then(function (value) {
+                        // console.log('注册成功，跳转到登陆页面')
+                        window.location='/login.html'
+                    })
+                } else {
+                    swal({
+                        title:'注册失败!',
+                        text:'注册失败，请稍后重试!',
+                        timer:30000
+                    }).then(
+                        function () {
+                            // console.log('注册失败后执行跳转')
+                            window.location='/admin/register.html'
+                    })
+                }
+            })
+        })
+    })
+</script>
+</body>
+</html>

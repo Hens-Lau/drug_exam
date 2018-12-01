@@ -54,4 +54,11 @@ public interface UserInfoService {
      * @return
      */
     boolean verify(List<String> userIdList);
+
+    /**
+     * 校验用户编号是否合法
+     * @param studentNo
+     * @return
+     */
+    boolean validUser(String studentNo);
 }

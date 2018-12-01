@@ -3,6 +3,7 @@ package com.here.controller.user;
 import com.github.pagehelper.PageInfo;
 import com.here.entity.UserInfo;
 import com.here.entity.vo.request.UserRequest;
+import com.here.entity.vo.response.CheckResponse;
 import com.here.service.UserInfoService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -76,5 +77,18 @@ public class UserInfoDataController {
             return false;
         }
         return userInfoService.verify(userRequest.getIdList());
+    }
+
+    @RequestMapping(value = "/admin/validate",produces = "application/json;charset=UTF-8")
+    public CheckResponse validUser(HttpServletRequest request,@RequestParam String studentNo){
+        boolean valid = userInfoService.validUser(studentNo);
+        CheckResponse response = new CheckResponse();
+        response.setValid(valid);
+        return response;
+    }
+
+    @RequestMapping(value = "/admin/addUser")
+    public boolean addUser(HttpServletRequest request, UserInfo userInfo){
+        return userInfoService.addUserInfo(userInfo);
     }
 }

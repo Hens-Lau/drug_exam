@@ -4,6 +4,7 @@ import com.github.pagehelper.PageInfo;
 import com.here.entity.UserInfo;
 import com.here.entity.vo.request.UserRequest;
 import com.here.service.UserInfoService;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,13 @@ public class UserInfoPageController {
         mav.addObject("allUsers",userInfoList);
 //        mav.setViewName("_admin/user");
         mav.setViewName("_admin/userList");
+        return mav;
+    }
+
+    @RequestMapping(value="/admin/register.html")
+    public ModelAndView register(HttpServletRequest request,HttpServletResponse response){
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("_admin/register");
         return mav;
     }
 

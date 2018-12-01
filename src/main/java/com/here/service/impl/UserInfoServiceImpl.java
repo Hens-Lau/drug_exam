@@ -175,4 +175,16 @@ public class UserInfoServiceImpl implements UserInfoService {
         }
         return true;
     }
+
+    @Override
+    public boolean validUser(String studentNo) {
+        if(StringUtils.isBlank(studentNo)){
+            LOG.error("校验的用户编号为空");
+            return true;
+        }
+        UserInfoExample example = new UserInfoExample();
+        example.createCriteria().andStudentNoEqualTo(studentNo);
+        List<UserInfo> list = userInfoMapper.selectByExample(example);
+        return CollectionUtils.isEmpty(list);
+    }
 }
