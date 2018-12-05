@@ -124,4 +124,6 @@ public interface QuestionMapper {
      * @return
      */
     List<Integer> selectQuestionIds();
+
+    List<QuestionWithBLOBs> selectExamQuestions(Integer examId);
 }

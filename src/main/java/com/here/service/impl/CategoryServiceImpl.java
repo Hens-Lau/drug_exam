@@ -92,11 +92,12 @@ public class CategoryServiceImpl implements CategoryService {
             LOG.error("没有找到父节点");
             return null;
         }
-        int id = categoryMapper.insertSelective(category);
-        if(id<1){
+        int counter = categoryMapper.insertSelective(category);
+        if(counter<1){
             LOG.error("新增类别失败");
             return null;
         }
+        int id = category.getId();
         Category updateCat = new Category();
         updateCat.setId(id);
         updateCat.setSequence(parentCat.getSequence()+id);

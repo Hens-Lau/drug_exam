@@ -3,6 +3,7 @@ package com.here.service;
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamLog;
 import com.here.entity.vo.request.ExamLogRequest;
+import com.here.entity.vo.response.ExamResponse;
 
 import java.util.List;
 
@@ -42,4 +43,11 @@ public interface ExamLogService {
      * @return
      */
     ExamLog selectExamLog(Integer id);
+
+    /**
+     * 保存答卷
+     * @param request
+     * @return
+     */
+    ExamResponse saveExam(ExamLogRequest request);
 }

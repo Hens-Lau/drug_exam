@@ -2,7 +2,10 @@ package com.here.controller.exam;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamPaper;
+import com.here.entity.vo.request.ExamLogRequest;
 import com.here.entity.vo.request.ExamPaperRequest;
+import com.here.entity.vo.response.ExamResponse;
+import com.here.service.ExamLogService;
 import com.here.service.ExamPaperService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,8 @@ public class ExamDataController {
     private final static Logger LOG = LoggerFactory.getLogger(ExamDataController.class);
     @Autowired
     private ExamPaperService examPaperService;
+    @Autowired
+    private ExamLogService examLogService;
 
     /**
      * 删除考卷
@@ -77,5 +82,11 @@ public class ExamDataController {
             return false;
         }
         return examPaperService.modifyExamPaper(examPaper);
+    }
+
+    @RequestMapping(value = "/user/submitExam")
+    public ExamResponse submitExamPaper(HttpServletRequest request, @RequestBody ExamLogRequest examLog){
+        //通过session获取当前用户 TODO
+        return examLogService.saveExam(examLog);
     }
 }

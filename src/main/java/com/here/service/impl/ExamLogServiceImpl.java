@@ -2,11 +2,16 @@ package com.here.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Maps;
 import com.here.dao.ExamLogMapper;
 import com.here.entity.ExamLog;
 import com.here.entity.ExamLogExample;
+import com.here.entity.QuestionWithBLOBs;
 import com.here.entity.vo.request.ExamLogRequest;
+import com.here.entity.vo.response.ExamResponse;
+import com.here.service.ExamInfoService;
 import com.here.service.ExamLogService;
+import com.here.service.ExamPaperService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +21,15 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ExamLogServiceImpl implements ExamLogService {
     private final static Logger LOG = LoggerFactory.getLogger(ExamLogServiceImpl.class);
     @Autowired
     private ExamLogMapper examLogMapper;
+    @Autowired
+    private ExamInfoService examInfoService;
     @Override
     public boolean saveBatch(List<ExamLog> examLogList, Integer paperId) {
         //判断用户id
@@ -133,5 +141,82 @@ public class ExamLogServiceImpl implements ExamLogService {
             return null;
         }
         return examLogMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public ExamResponse saveExam(ExamLogRequest request) {
+        ExamResponse response = new ExamResponse();
+        //用户编号
+        String studentNo = request.getUserId();
+        if(StringUtils.isBlank(studentNo)){
+            LOG.error("用户编号不能为空");
+            response.setErrorMsg("没有找到考生信息!");
+            return response;
+        }
+        //考卷
+        Integer examId = request.getPaperId();
+        //根据考卷查询考题
+        List<QuestionWithBLOBs> questionList = examInfoService.selectExamQuestionList(examId);
+        if(CollectionUtils.isEmpty(questionList)){
+            LOG.error("考卷为空,{},{}",studentNo,examId);
+            response.setErrorMsg("考卷为空!");
+            return response;
+        }
+        //处理答案
+        String answer = request.getAnswer();
+        Map<Integer,String> answerMap = trans2Answer(answer);
+        //根据考题答案，计算得分
+        BigDecimal score = rewinding(questionList,answerMap);
+        ExamLog examLog = new ExamLog();
+        examLog.setUserId(studentNo);
+        examLog.setPaperId(examId);
+        examLog.setAnswer(answer);
+        examLog.setScore(score);
+        short init = Short.valueOf("0");
+        examLog.setStatus(init);
+        //自动批卷时，老师编号是0000
+        examLog.setTeacherId("0000");
+        examLogMapper.insertSelective(examLog);
+        response.setExamLogId(examLog.getId());
+        response.setScore(score.toString());
+        return response;
+    }
+
+    private BigDecimal rewinding(List<QuestionWithBLOBs> questionList, Map<Integer,String> answerMap){
+        BigDecimal total = new BigDecimal(0);
+        for(QuestionWithBLOBs question: questionList){
+            if(StringUtils.equalsIgnoreCase(question.getAnswer(),answerMap.get(question.getId()))){
+                if(question.getInitScore()==null){
+                    LOG.warn("考题没有设定分数,id:{},使用默认分数:{}",question.getId(),5);
+                    total = total.add(new BigDecimal("5"));
+                } else {
+                    total = total.add(question.getInitScore());
+                }
+            }
+        }
+        total.setScale(2,BigDecimal.ROUND_HALF_UP);
+        return total;
+    }
+
+    private Map<Integer,String> trans2Answer(String answer){
+        Map<Integer,String> answerMap = Maps.newHashMap();
+        if(StringUtils.isBlank(answer)){
+            return answerMap;
+        }
+        for(String entry:StringUtils.split(answer,"&")){
+            String[] array = StringUtils.split(entry,"=");
+            if(array==null || array.length<2){
+                LOG.error("用户的答案存在问题:{},{}",entry,answer);
+                continue;
+            }
+            Integer key = Integer.parseInt(array[0]);
+            if(answerMap.containsKey(key)){
+                String preVal = answerMap.get(key);
+                answerMap.put(key,preVal+array[1]);
+            } else {
+                answerMap.put(key,array[1]);
+            }
+        }
+        return answerMap;
     }
 }

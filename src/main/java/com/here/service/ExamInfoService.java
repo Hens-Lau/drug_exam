@@ -1,5 +1,8 @@
 package com.here.service;
 
+import com.here.entity.ExamInfo;
+import com.here.entity.QuestionWithBLOBs;
+
 import java.util.List;
 
 public interface ExamInfoService {
@@ -18,4 +21,11 @@ public interface ExamInfoService {
      * @return
      */
     boolean modifyExamInfo(List<Integer> questionIdList, Integer examId);
+
+    /**
+     * 查询考卷下考题集合
+     * @param examId
+     * @return
+     */
+    List<QuestionWithBLOBs> selectExamQuestionList(Integer examId);
 }

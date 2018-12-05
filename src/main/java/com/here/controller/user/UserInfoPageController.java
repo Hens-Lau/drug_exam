@@ -1,8 +1,16 @@
 package com.here.controller.user;
 
 import com.github.pagehelper.PageInfo;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.here.entity.ExamPaper;
+import com.here.entity.Question;
+import com.here.entity.QuestionWithBLOBs;
 import com.here.entity.UserInfo;
 import com.here.entity.vo.request.UserRequest;
+import com.here.service.ExamInfoService;
+import com.here.service.ExamPaperService;
 import com.here.service.UserInfoService;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.slf4j.Logger;
@@ -22,6 +30,10 @@ public class UserInfoPageController {
 
     @Autowired
     private UserInfoService userInfoService;
+    @Autowired
+    private ExamPaperService examPaperService;
+    @Autowired
+    private ExamInfoService examInfoService;
 
     @RequestMapping(value = "/admin/index.html")
     public ModelAndView adminIndex(HttpServletRequest req, HttpServletResponse resp){
@@ -33,7 +45,66 @@ public class UserInfoPageController {
 
     @RequestMapping(value = "/user/exam.html")
     public ModelAndView userIndex(HttpServletRequest request,HttpServletResponse response){
+        Integer examId = 6;
         ModelAndView mav = new ModelAndView();
+        //查询考卷信息,TODO 动态传参
+        ExamPaper examPaper = examPaperService.selectExamPaper(examId);
+        mav.addObject("exam",examPaper);
+        //查询考题信息
+        List<QuestionWithBLOBs> questionList = examInfoService.selectExamQuestionList(examId);
+        //考题数
+        mav.addObject("total",questionList.size());
+        //题型,1:单选,2:多选,3:填空,4:判断,5:综合
+        //单选
+        List<QuestionWithBLOBs> sQuestionList = Lists.newArrayList(Collections2.filter(questionList, new Predicate<QuestionWithBLOBs>() {
+            public boolean apply(QuestionWithBLOBs question) {
+                return question.getType()==1;
+            }
+            public boolean test(QuestionWithBLOBs question){
+                return apply(question);
+            }
+        }));
+        mav.addObject("single",sQuestionList);
+        //多选
+        List<QuestionWithBLOBs> mQuestonList = Lists.newArrayList(Collections2.filter(questionList, new Predicate<QuestionWithBLOBs>() {
+            public boolean apply(QuestionWithBLOBs question) {
+                return question.getType()==2;
+            }
+            public boolean test(QuestionWithBLOBs question){
+                return apply(question);
+            }
+        }));
+        mav.addObject("multi",mQuestonList);
+        //填空
+        List<QuestionWithBLOBs> bQuestionList = Lists.newArrayList(Collections2.filter(questionList, new Predicate<QuestionWithBLOBs>() {
+            public boolean apply(QuestionWithBLOBs question) {
+                return question.getType()==3;
+            }
+            public boolean test(QuestionWithBLOBs question){
+                return apply(question);
+            }
+        }));
+        mav.addObject("blank",bQuestionList);
+        //判断
+        List<QuestionWithBLOBs> jQuestionList = Lists.newArrayList(Collections2.filter(questionList, new Predicate<QuestionWithBLOBs>() {
+            public boolean apply(QuestionWithBLOBs question) {
+                return question.getType()==4;
+            }
+            public boolean test(QuestionWithBLOBs question){
+                return apply(question);
+            }
+        }));
+        mav.addObject("judge",jQuestionList);
+        //综合
+        List<QuestionWithBLOBs> cQuestionList = Lists.newArrayList(Collections2.filter(questionList, new Predicate<QuestionWithBLOBs>() {
+            public boolean apply(QuestionWithBLOBs question) {
+                return question.getType()==5;
+            }
+            public boolean test(QuestionWithBLOBs question){
+                return apply(question);
+            }
+        }));
+        mav.addObject("comprehension",cQuestionList);
         mav.setViewName("_user/exam");
         return mav;
     }
@@ -56,6 +127,12 @@ public class UserInfoPageController {
         return mav;
     }
 
+    @RequestMapping(value = "/user/examList.html")
+    public ModelAndView examList(HttpServletRequest request,HttpServletResponse response){
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("_user/examList");
+        return mav;
+    }
     private List<UserInfo> getUserList(){
         UserRequest request = new UserRequest();
         request.setPage(1);

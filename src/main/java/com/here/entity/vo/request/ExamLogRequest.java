@@ -17,6 +17,8 @@ public class ExamLogRequest extends BaseRequest {
     private Integer questionNo;
     //考题状态
     private Integer status;
+    //答案
+    private String answer;
 
     public Integer getId() {
         return id;
@@ -80,5 +82,13 @@ public class ExamLogRequest extends BaseRequest {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 }

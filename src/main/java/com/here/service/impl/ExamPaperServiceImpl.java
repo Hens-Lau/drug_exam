@@ -66,9 +66,9 @@ public class ExamPaperServiceImpl implements ExamPaperService {
             return false;
         }
         //状态
-
-        final int examId = examPaperMapper.insertSelective(examPaper);
-        if(examId<1){
+        examPaperMapper.insertSelective(examPaper);
+        final int examId = examPaper.getId();
+        if(examPaper.getId()==null || examPaper.getId()<1){
             LOG.error("新增考卷失败,id={}",examId);
             return false;
         }
@@ -124,7 +124,7 @@ public class ExamPaperServiceImpl implements ExamPaperService {
         for(ExamInfo examInfo:examInfoList){
             if(examInfoMapper.insertSelective(examInfo)<1){
                 LOG.error("保存考卷考题失败,{},{},{}",examInfo.getExamId(),examInfo.getQuestionId(),isModify);
-                return false;
+//                return false;
             }
         }
         return true;

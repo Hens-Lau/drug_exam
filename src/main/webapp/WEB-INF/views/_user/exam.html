@@ -2,20 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>bootstarp美化试卷</title>
-    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <title>佛山一中</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/sweetalert2.min.css">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/sweetalert2.min.js"></script>
 </head>
 <body>
-<h1 align="center">统一建模语言理论测试</h1>
+<input type="hidden" id="examId" value="${exam.id!}">
+<form id="exam">
+<h1 align="center">佛山市第一中学禁毒考试系统</h1>
 <div class="row">
 <div class="col-md-offset-2 col-md-8">
         <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="col-md-4">
-                        考试科目：统一建模语言
+                        考试科目：${exam.name!}
                     </div>
                     <div class="col-md-4">
-                        时间：100分钟
+                        时间：${exam.maxTime!}分钟
                     </div>
                     <div class="col-md-4">
                         得分：
@@ -41,88 +47,156 @@
     </div>
 </div>
 </div>
+<#if blank??&&(blank?size>0)>
 <div class="row">
 <div class="col-md-offset-2 col-md-8">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">一·填空题(每空5分，共20分)</h3>
+            <h3 class="panel-title">填空题(共:${blank?size}题)</h3>
         </div>
         <div class="panel-body">
-            <p>1.UML 的中文全称是:<input type="text" name="tk1"></p>
-            <p>2.对象最突出的特征是:<input type="text" name="tk2"></p>
+            <#list blank as question>
+            <p>${question_index + 1}.${question.title!}:<input type="text" name="${question.id!}"> </p>
+            </#list>
         </div>
     </div>
 </div>
 </div>
+</#if>
+<#if single??&&(single?size>0)>
 <div class="row">
-<div class="col-md-offset-2 col-md-8">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">二·选择题(每题10分，共20分)</h3>
-        </div>
-        <div class="panel-body">
-            <p>1.UML 与软件工程的关系是:</p>
-            <p><input type="radio" name="select1">(A)UML 就是软件工程</p>
-            <p><input type="radio" name="select1">(B)UML 参与到软件工程中软件开发过程的几个阶段</p>
-            <p><input type="radio" name="select1">(C)UML 与软件工程无关</p>
-            <p><input type="radio" name="select1">(D)UML 是软件工程的一部分</p>
-            <p>2.Java 语言支持:</p>
-            <p><input type="radio" name="select2">(A)单继承</p>
-            <p><input type="radio" name="select2">(C)单继承和多继承都支持</p>
-            <p><input type="radio" name="select2">(D)单继承和多继承都不支持</p>
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">单项选择题(共:${single?size}题)</h3>
+            </div>
+            <div class="panel-body">
+                <#list single as question>
+                <p>${question_index + 1}.${question.title!}</p>
+                <#if question.options?exists>
+                    <#assign jsonOptions=question.options?eval />
+                    <#if jsonOptions.A?exists && jsonOptions.A!="">
+                        <p><input type="radio" name="${question.id!}" value="A">(A)${jsonOptions.A!} </p>
+                    </#if>
+                    <#if jsonOptions.B?exists && jsonOptions.B!="">
+                        <p><input type="radio" name="${question.id!}" value="B">(B)${jsonOptions.B!} </p>
+                    </#if>
+                    <#if jsonOptions.C?exists && jsonOptions.C!="">
+                        <p><input type="radio" name="${question.id!}" value="C">(C)${jsonOptions.C!} </p>
+                    </#if>
+                    <#if jsonOptions.D?exists && jsonOptions.D!="">
+                        <p><input type="radio" name="${question.id!}" value="D">(D)${jsonOptions.D!} </p>
+                    </#if>
+                </#if>
+                </#list>
+            </div>
         </div>
     </div>
 </div>
-</div>
+</#if>
+<#if multi??&&(multi?size>0)>
 <div class="row">
-<div class="col-md-offset-2 col-md-8">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">三·多选题(每题10分，共20分)</h3>
-        </div>
-        <div class="panel-body">
-            <p>1. 用例的粒度分为以下哪三种。</p>
-            <p><input type="checkbox" name="moreselect1">(A)概述级</p>
-            <p><input type="checkbox" name="moreselect1">(B)需求级</p>
-            <p><input type="checkbox" name="moreselect1">(C)用户目标级</p>
-            <p><input type="checkbox" name="moreselect1">(D)子功能级</p>
-            <p>2. 类图由以下哪三部分组成。</p>
-            <p><input type="checkbox" name="moreselect2">(A)名称(Name)</p>
-            <p><input type="checkbox" name="moreselect2">(B)属性(Attribute)</p>
-            <p><input type="checkbox" name="moreselect2">(C)操作(Operation)</p>
-            <p><input type="checkbox" name="moreselect2">(D)方法(Function)</p>
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">多项选择题(共:${multi?size}题)</h3>
+            </div>
+            <div class="panel-body">
+                <#list multi as question>
+                    <p>${question_index + 1}.${question.title!}</p>
+                    <#if question.options?exists>
+                        <#assign jsonOptions=question.options?eval />
+                        <#if jsonOptions.A?exists && jsonOptions.A!="">
+                            <p><input type="checkbox" name="${question.id!}" value="A">(A)${jsonOptions.A!} </p>
+                        </#if>
+                        <#if jsonOptions.B?exists && jsonOptions.B!="">
+                            <p><input type="checkbox" name="${question.id!}" value="B">(B)${jsonOptions.B!} </p>
+                        </#if>
+                        <#if jsonOptions.C?exists && jsonOptions.C!="">
+                            <p><input type="checkbox" name="${question.id!}" value="C">(C)${jsonOptions.C!} </p>
+                        </#if>
+                        <#if jsonOptions.D?exists && jsonOptions.D!="">
+                            <p><input type="checkbox" name="${question.id!}" value="D">(D)${jsonOptions.D!} </p>
+                        </#if>
+                    </#if>
+                </#list>
+            </div>
         </div>
     </div>
 </div>
-</div>
+</#if>
+<#if judge??&&(judge?size>0)>
 <div class="row">
-<div class="col-md-offset-2 col-md-8">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">四·判断题(每题20分，共20分)</h3>
-        </div>
-        <div class="panel-body">
-            <p>1. 用例图只是用于和客户交流和沟通的,用于确定需求。&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="judg1">对<input type="radio" name="judg1">错</p>
-            <p>2. 在状态图中,终止状态在一个状态图中允许有任意多个。<input type="radio" name="judg2">对<input type="radio" name="judg2">错</p>
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">判断题(共:${judge?size}题)</h3>
+            </div>
+            <div class="panel-body">
+                <#list judge as question>
+                <p>${question_index + 1}.${question.title!}<input type="radio" name="${question.id!}" value="1">正确<input type="radio" name="${question.id!}" value="0">错误 </p>
+                </#list>
+            </div>
         </div>
     </div>
 </div>
-</div>
+</#if>
+<#if comprehension??&&(comprehension?size>0)>
 <div class="row">
-<div class="col-md-offset-2 col-md-8">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">五·简 答 题 ( 每 题 4 分 , 共 20 分 )</h3>
-        </div>
-        <div class="panel-body">
-            1. 简述什么是模型以及模型的表现形式?
-            <textarea rows="5" cols="80%" name="lasttext"></textarea>
+    <div class="col-md-offset-2 col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">综合题 (共:${comprehension?size}题)</h3>
+            </div>
+            <div class="panel-body">
+                <#list comprehension as question>
+                ${question_index + 1}.${question.title!}
+                <textarea rows="5" cols="80%" name="${question.id!}"></textarea>
+                </#list>
+            </div>
         </div>
     </div>
 </div>
-</div>
+</#if>
 <div class="col-md-offset-5 col-md-2">
-    <button type=button class="btn btn-primary">计算分数</button>
+    <button type=button class="btn btn-primary" onclick="submitForm();">提交</button>
 </div>
+</form>
 </body>
+<script type="text/javascript">
+    function submitForm() {
+        var data = $('#exam').serialize();
+        console.log('form表单数据是:'+data)
+        //考卷id
+        var examId = $('#examId').val()
+        var params = {'paperId':examId,'userId':'10000','answer':data}
+        $.ajax({
+            type:'post',
+            url:'/user/submitExam',
+            async:false,
+            contentType:'application/json',
+            data:JSON.stringify(params),
+            // dataType:'json',
+            success:function (response) {
+                console.log('response:'+JSON.stringify(response))
+                if(response.examLogId!=null && response.examLogId>0) {
+                    swal({
+                        title: '提交成功!',
+                        text: '本次得分:'+response.score
+                    }).then(function (value) {
+                        window.location = '/login.html'
+                    })
+                } else {
+                    swal({
+                        title:'提交失败,请稍后重试!',
+                        text:'错误信息:'+ response.errorMsg
+                    })
+                }
+            },
+            error:function (message) {
+                console.log('message:'+JSON.stringify(message))
+            }
+        })
+    }
+</script>
 </html>
