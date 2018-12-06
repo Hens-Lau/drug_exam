@@ -4,13 +4,11 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
-import com.here.entity.ExamPaper;
-import com.here.entity.Question;
-import com.here.entity.QuestionWithBLOBs;
-import com.here.entity.UserInfo;
+import com.here.entity.*;
 import com.here.entity.vo.request.UserRequest;
 import com.here.service.ExamInfoService;
 import com.here.service.ExamPaperService;
+import com.here.service.SysInfoService;
 import com.here.service.UserInfoService;
 import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.slf4j.Logger;
@@ -34,6 +32,8 @@ public class UserInfoPageController {
     private ExamPaperService examPaperService;
     @Autowired
     private ExamInfoService examInfoService;
+    @Autowired
+    private SysInfoService sysInfoService;
 
     @RequestMapping(value = "/admin/index.html")
     public ModelAndView adminIndex(HttpServletRequest req, HttpServletResponse resp){
@@ -105,6 +105,10 @@ public class UserInfoPageController {
             }
         }));
         mav.addObject("comprehension",cQuestionList);
+        //用户信息
+        mav.addObject("userInfo",request.getSession().getAttribute("user"));
+        //水印信息
+        mav.addObject("mark",getSysMark());
         mav.setViewName("_user/exam");
         return mav;
     }
@@ -139,5 +143,14 @@ public class UserInfoPageController {
         request.setPageSize(1000);
         PageInfo<UserInfo> pageInfo = userInfoService.selectUserInfo(request);
         return pageInfo.getList();
+    }
+
+    private String getSysMark(){
+        SysInfo sysInfo = sysInfoService.getLocalSysInfo();
+        if(sysInfo==null){
+            LOG.error("没有找到系统设置，使用默认值");
+            return "佛山一中禁毒考试";
+        }
+        return sysInfo.getSysMark();
     }
 }

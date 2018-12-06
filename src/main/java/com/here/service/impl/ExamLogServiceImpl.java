@@ -4,14 +4,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Maps;
 import com.here.dao.ExamLogMapper;
-import com.here.entity.ExamLog;
-import com.here.entity.ExamLogExample;
-import com.here.entity.QuestionWithBLOBs;
+import com.here.entity.*;
 import com.here.entity.vo.request.ExamLogRequest;
 import com.here.entity.vo.response.ExamResponse;
 import com.here.service.ExamInfoService;
 import com.here.service.ExamLogService;
 import com.here.service.ExamPaperService;
+import com.here.service.ScoreService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +30,10 @@ public class ExamLogServiceImpl implements ExamLogService {
     private ExamLogMapper examLogMapper;
     @Autowired
     private ExamInfoService examInfoService;
+    @Autowired
+    private ExamPaperService examPaperService;
+    @Autowired
+    private ScoreService scoreService;
     @Override
     public boolean saveBatch(List<ExamLog> examLogList, Integer paperId) {
         //判断用户id
@@ -179,7 +183,31 @@ public class ExamLogServiceImpl implements ExamLogService {
         examLogMapper.insertSelective(examLog);
         response.setExamLogId(examLog.getId());
         response.setScore(score.toString());
+        //将得分直接登记  TODO 如果手工阅卷，则需要调整策略
+        Score scoreEntity = trans2ScoreEntity(examId,studentNo,score);
+        boolean scoreFlag = scoreService.saveScore(scoreEntity);
+        LOG.info("自动阅卷，scoreFlag={}",scoreFlag);
         return response;
+    }
+
+    private Score trans2ScoreEntity(Integer examPaperId,String userId,BigDecimal scoreVal){
+        Score score = new Score();
+        score.setRoomId(examPaperId);
+        score.setUserId(userId);
+        score.setScore(scoreVal);
+        long current = System.currentTimeMillis();
+        Date now = new Date(current);
+        score.setReateTime(now);
+        score.setUpdateTime(now);
+        //判断获奖状态
+        ExamPaper examPaper = examPaperService.selectExamPaper(examPaperId);
+        BigDecimal passingScore = examPaper.getPassing();
+        if(scoreVal.doubleValue()>=passingScore.doubleValue()){
+            score.setAwardStatus(new Short("1"));
+        } else {
+            score.setAwardStatus(new Short("0"));
+        }
+        return score;
     }
 
     private BigDecimal rewinding(List<QuestionWithBLOBs> questionList, Map<Integer,String> answerMap){

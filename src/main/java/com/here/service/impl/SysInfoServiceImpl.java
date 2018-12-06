@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 @Service
@@ -69,5 +72,32 @@ public class SysInfoServiceImpl implements SysInfoService {
         List<SysInfo> sysInfoList = sysInfoMapper.selectByExample(example);
         PageInfo<SysInfo> pageInfo = new PageInfo<>(sysInfoList);
         return pageInfo;
+    }
+
+    @Override
+    public List<SysInfo> getSysInfoList() {
+        SysInfoExample example = new SysInfoExample();
+        return sysInfoMapper.selectByExample(example);
+    }
+
+    @Override
+    public SysInfo getLocalSysInfo() {
+        InetAddress ia = null;
+        String ip = null;
+        try {
+            ia = InetAddress.getLocalHost();
+            ip = ia.getHostAddress();
+            LOG.info("本机ip是,{}",ip);
+        } catch (UnknownHostException e) {
+            LOG.error("查询本机ip异常");
+        }
+        SysInfoExample example = new SysInfoExample();
+        example.createCriteria().andMacEqualTo(ip);
+        List<SysInfo> sysInfos = sysInfoMapper.selectByExample(example);
+        if(CollectionUtils.isEmpty(sysInfos)){
+            LOG.warn("系统设置为空");
+            return null;
+        }
+        return sysInfos.get(0);
     }
 }

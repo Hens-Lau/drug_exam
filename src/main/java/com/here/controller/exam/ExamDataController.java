@@ -2,6 +2,7 @@ package com.here.controller.exam;
 
 import com.github.pagehelper.PageInfo;
 import com.here.entity.ExamPaper;
+import com.here.entity.UserInfo;
 import com.here.entity.vo.request.ExamLogRequest;
 import com.here.entity.vo.request.ExamPaperRequest;
 import com.here.entity.vo.response.ExamResponse;
@@ -87,6 +88,17 @@ public class ExamDataController {
     @RequestMapping(value = "/user/submitExam")
     public ExamResponse submitExamPaper(HttpServletRequest request, @RequestBody ExamLogRequest examLog){
         //通过session获取当前用户 TODO
+        UserInfo userInfo = (UserInfo) request.getSession().getAttribute("user");
+        if(userInfo==null){
+            LOG.error("没有找到有效用户");
+            ExamResponse response = new ExamResponse();
+            response.setErrorMsg("用户登陆超时");
+            return response;
+        }
+        String studentNo = userInfo.getStudentNo();
+        examLog.setUserId(studentNo);
+        //考试完毕，清理session
+        request.getSession().setAttribute("user",null);
         return examLogService.saveExam(examLog);
     }
 }

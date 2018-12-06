@@ -29,7 +29,14 @@ public class UserInfoDataController {
         if(session==null || !StringUtils.equalsIgnoreCase((String)session.getAttribute("code"),userInfo.getCode())){
             return "0";
         }
-        Short type = userInfoService.queryUserType(userInfo);
+        UserInfo loginUser = userInfoService.queryUserType(userInfo);
+        if(loginUser==null){
+            return "-1";
+        }
+        Short type = loginUser.getRole();
+        //清空密码
+        loginUser.setPassword(null);
+        request.getSession().setAttribute("user",loginUser);
         LOG.info("用户登陆 type="+type);
         return type.toString();
     }

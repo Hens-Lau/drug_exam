@@ -12,7 +12,7 @@ public interface UserInfoService {
      * @param userInfo
      * @return
      */
-    Short queryUserType(UserInfo userInfo);
+    UserInfo queryUserType(UserInfo userInfo);
 
     /**
      * 新增用户

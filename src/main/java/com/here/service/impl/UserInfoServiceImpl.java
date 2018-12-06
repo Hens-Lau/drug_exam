@@ -24,18 +24,18 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Autowired
     private UserInfoMapper userInfoMapper;
     @Override
-    public Short queryUserType(UserInfo userInfo) {
+    public UserInfo queryUserType(UserInfo userInfo) {
         if(userInfo==null){
             LOG.error("查询用户信息不能未空");
-            return -1;
+            return null;
         }
         if (StringUtils.isEmpty(userInfo.getStudentNo())){
             LOG.warn("查询用户编号不能为空");
-            return -1;
+            return null;
         }
         if(StringUtils.isEmpty(userInfo.getPassword())){
             LOG.warn("查询用户密码不能为空");
-            return -1;
+            return null;
         }
         UserInfoExample example = new UserInfoExample();
         example.createCriteria().andStudentNoEqualTo(userInfo.getStudentNo())
@@ -44,9 +44,9 @@ public class UserInfoServiceImpl implements UserInfoService {
         List<UserInfo> userInfoList = userInfoMapper.selectByExample(example);
         if(CollectionUtils.isEmpty(userInfoList)){
             LOG.info("没有找到用户,{}",userInfo.getStudentNo());
-            return -1;
+            return null;
         }
-        return userInfoList.get(0).getRole();
+        return userInfoList.get(0);
     }
 
     @Override
