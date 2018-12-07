@@ -43,7 +43,7 @@ public class ScoreServiceImpl implements ScoreService {
         if(scoreRequest.getPrintStatus()!=null){
             criteria.andPrintStatusEqualTo(scoreRequest.getPrintStatus().shortValue());
         }
-        List<Score> scoreList = scoreMapper.selectByExample(example);
+        List<Score> scoreList = scoreMapper.selectScoreList(scoreRequest);//scoreMapper.selectByExample(example);
         PageHelper.startPage(scoreRequest.getPage(),scoreRequest.getPageSize());
         PageInfo<Score> pageInfo = new PageInfo<>(scoreList);
         pageInfo.setTotal(scoreList==null?0:scoreList.size());

@@ -8,6 +8,7 @@
     <link href="/static/css/bootstrap-table.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/bootstrapValidator.min.css"/>
     <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/background.css">
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="/static/js/bootstrap-table.min.js"></script>
@@ -49,6 +50,47 @@
                     <span class="glyphicon glyphicon-print" aria-hidden="true">打印</span>
                 </button>
             </div>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog modal-lg" role="document" style="width: 950px">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">打印预览</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="qrcode" >
+                                <img src="/static/images/certificate.jpg" class="img1"/>
+                                <div class="body text">
+                                    <h3>尤振强	</h3>
+                                </div>
+                                <div class="year">
+                                    <h4>18</h4>
+                                </div>
+                                <div class="month">
+                                    <h4>12</h4>
+                                </div>
+                                <div class="day">
+                                    <h4>08</h4>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <!-- <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                             <button type="button" class="btn btn-primary">打印</button>  -->
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true">关闭 </span>
+                            </button>
+                            <button type="button" id="button_print" class="btn btn-primary" data-dismiss="modal">
+                                <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true">打印 </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

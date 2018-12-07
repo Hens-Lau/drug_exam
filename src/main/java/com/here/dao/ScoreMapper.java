@@ -3,6 +3,8 @@ package com.here.dao;
 import com.here.entity.Score;
 import com.here.entity.ScoreExample;
 import java.util.List;
+
+import com.here.entity.vo.request.ScoreRequest;
 import org.apache.ibatis.annotations.Param;
 
 public interface ScoreMapper {
@@ -93,4 +95,6 @@ public interface ScoreMapper {
      * @mbg.generated Mon Oct 15 11:20:36 CST 2018
      */
     int updateByPrimaryKey(Score record);
+
+    List<Score> selectScoreList(ScoreRequest request);
 }
