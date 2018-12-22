@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.here.dao.QuestionMapper;
+import com.here.dao.SysInfoMapper;
 import com.here.entity.Question;
 import com.here.entity.QuestionExample;
 import com.here.entity.QuestionWithBLOBs;
@@ -40,6 +41,8 @@ public class QuestionSeriviceImpl implements QuestionService {
     private final static String TEMP_PATH = "./temp/export/";
     @Autowired
     private QuestionMapper questionMapper;
+    @Autowired
+    private SysInfoMapper sysInfoMapper;
 
     @Override
     public PageInfo<QuestionWithBLOBs> selectQuestionList(QuestionRequest questionRequest) {
@@ -371,6 +374,7 @@ public class QuestionSeriviceImpl implements QuestionService {
         }
         return question;
     }
+
 
     /**
      * 处理多选题

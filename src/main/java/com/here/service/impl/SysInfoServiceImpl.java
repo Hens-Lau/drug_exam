@@ -7,6 +7,7 @@ import com.here.entity.SysInfo;
 import com.here.entity.SysInfoExample;
 import com.here.entity.vo.request.SysInfoRequest;
 import com.here.service.SysInfoService;
+import com.here.utils.LOCALMAC;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -86,10 +88,12 @@ public class SysInfoServiceImpl implements SysInfoService {
         String ip = null;
         try {
             ia = InetAddress.getLocalHost();
-            ip = ia.getHostAddress();
+            ip = LOCALMAC.getLocalMac(ia);
             LOG.info("本机ip是,{}",ip);
         } catch (UnknownHostException e) {
             LOG.error("查询本机ip异常");
+        } catch (SocketException e) {
+            e.printStackTrace();
         }
         SysInfoExample example = new SysInfoExample();
         example.createCriteria().andMacEqualTo(ip);
