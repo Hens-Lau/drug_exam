@@ -4,6 +4,19 @@ $(function() {
             height:tableHeight()
         })
     });
+    window.operateEvents = {
+        'click #examer':function (e,value,row,index) {
+            var examId = row.id
+            console.log('examId='+examId)
+            $.get(
+                "/admin/startExam?examId="+examId,
+                function (data,state) {
+                    console.log('data='+JSON.stringify(data))
+                    $('#examtab').bootstrapTable('refresh',{url:'/admin/getAllExamPaper'})
+                }
+            )
+        }
+    }
     $('#examtab').bootstrapTable({
         method:'post',
         url:'/admin/getAllExamPaper',
@@ -61,6 +74,14 @@ $(function() {
                 field:'status',
                 align:'center',
                 formatter:statusFormatter
+            },
+            {
+                title:'operate',
+                title:'操作',
+                align:'center',
+                width:100,
+                events:operateEvents,
+                formatter:operationFormatter
             }
         ],
         responseHandler:function (res) {
@@ -77,6 +98,17 @@ $(function() {
             return '考试'
         } else {
             return '其他'
+        }
+    }
+    function operationFormatter(value,row,index) {
+        if(row.status==0){
+            return ['<button type="button" id="examer" class="btn btn-primary btn-sm" style="margin-right: 15px">' +
+            '                                开考' +
+            '                            </button>']
+        } else {
+            return ['<button type="button" id="imexamer" class="btn btn-default btn-sm disabled" style="margin-right: 15px">' +
+            '                                <span>开考 </span>' +
+            '                            </button>']
         }
     }
     function statusFormatter(value,row,index) {

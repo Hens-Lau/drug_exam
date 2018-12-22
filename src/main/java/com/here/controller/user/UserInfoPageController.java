@@ -45,10 +45,14 @@ public class UserInfoPageController {
 
     @RequestMapping(value = "/user/exam.html")
     public ModelAndView userIndex(HttpServletRequest request,HttpServletResponse response){
-        Integer examId = 6;
         ModelAndView mav = new ModelAndView();
         //查询考卷信息,TODO 动态传参
-        ExamPaper examPaper = examPaperService.selectExamPaper(examId);
+        ExamPaper examPaper = examPaperService.getExamPaper();
+        if(examPaper==null){
+            LOG.error("没有找到有效考卷");
+            return new ModelAndView("_admin/register");
+        }
+        Integer examId = examPaper.getId();
         mav.addObject("exam",examPaper);
         //查询考题信息
         List<QuestionWithBLOBs> questionList = examInfoService.selectExamQuestionList(examId);

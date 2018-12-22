@@ -5,14 +5,17 @@ import com.here.entity.ExamPaper;
 import com.here.entity.UserInfo;
 import com.here.entity.vo.request.ExamLogRequest;
 import com.here.entity.vo.request.ExamPaperRequest;
+import com.here.entity.vo.response.BaseResponse;
 import com.here.entity.vo.response.ExamResponse;
 import com.here.service.ExamLogService;
 import com.here.service.ExamPaperService;
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -100,5 +103,15 @@ public class ExamDataController {
         //考试完毕，清理session
         request.getSession().setAttribute("user",null);
         return examLogService.saveExam(examLog);
+    }
+
+    @RequestMapping(value = "/admin/startExam")
+    public BaseResponse startExam(HttpServletRequest request, @RequestParam Integer examId){
+        if(examId==null || examId<1){
+            LOG.error("没有有效的考卷信息,{}",examId);
+            return BaseResponse.newErrorResponse(100,"考卷编号错误");
+        }
+        examPaperService.startExam(examId);
+        return BaseResponse.newResponseInstance("设置成功");
     }
 }

@@ -83,12 +83,16 @@
     <!-- 拦截 -->
     <mvc:interceptors>
         <mvc:interceptor>
-            <mvc:mapping path="/admin/*"/>
+            <mvc:mapping path="/admins/*"/>
             <bean class="com.here.interceptor.UserInterceptor" />
         </mvc:interceptor>
         <mvc:interceptor>
-            <mvc:mapping path="/exam/*" />
+            <mvc:mapping path="/examer/*" />
             <bean class="com.here.interceptor.ExamInterceptor" />
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/*"/>
+            <bean class="com.here.entity.UserInfoEntity" />
         </mvc:interceptor>
     </mvc:interceptors>
 </beans>

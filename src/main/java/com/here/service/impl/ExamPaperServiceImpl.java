@@ -223,4 +223,27 @@ public class ExamPaperServiceImpl implements ExamPaperService {
     public ExamPaper selectExamPaper(Integer id) {
         return examPaperMapper.selectByPrimaryKey(id);
     }
+
+    @Override
+    public boolean startExam(Integer examId) {
+        ExamPaper examPaper = new ExamPaper();
+        examPaper.setStatus(Short.valueOf("0"));
+        ExamPaperExample example = new ExamPaperExample();
+        example.createCriteria().andStatusEqualTo(Short.valueOf("1"));
+        examPaperMapper.updateByExampleSelective(examPaper,example);
+        ExamPaper myExam = new ExamPaper();
+        myExam.setId(examId);
+        myExam.setStatus(Short.valueOf("1"));
+        examPaperMapper.updateByPrimaryKeySelective(myExam);
+        return true;
+    }
+
+    @Override
+    public ExamPaper getExamPaper() {
+        ExamPaperExample example = new ExamPaperExample();
+        example.createCriteria().andStatusEqualTo(Short.valueOf("1"));
+        List<ExamPaper> examPapers = examPaperMapper.selectByExample(example);
+
+        return CollectionUtils.isEmpty(examPapers)?null:examPapers.get(0);
+    }
 }

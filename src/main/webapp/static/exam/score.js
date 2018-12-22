@@ -4,7 +4,18 @@ $(function () {
             height:tableHeight()
         }
     })
-    console.log('执行js脚本')
+    window.operateEvents  = {
+        "click #printer":function(e, value, row, index) {
+            var date = new Date()
+            var fullYear = date.getFullYear()
+            $('#printName').html(row.userName)
+            $('#printYear').html(fullYear.toString().substr(2,2))
+            $('#printMonth').html(date.getMonth()+1)
+            $('#printDay').html(date.getDate())
+            $('#myModal').modal('show')
+        }
+    }
+    // console.log('执行js脚本')
     $('#scoretab').bootstrapTable({
         method:'post',
         url:'/admin/getAllScore',
@@ -66,6 +77,14 @@ $(function () {
                 field:'awardStatus',
                 align:'center',
                 formatter:statusFormatter
+            },
+            {
+                field:'operate',
+                title:'操作',
+                align:'center',
+                width:100,
+                events:operateEvents,
+                formatter:operateFormatter
             }
         ],
         responseHandler:function (res) {
@@ -75,6 +94,18 @@ $(function () {
         },
         local:'zh-CN',
     })
+
+    function operateFormatter(value,row,index) {
+        if(row.awardStatus==1){
+            return ['<button type="button" id="printer" class="btn btn-primary btn-sm" style="margin-right: 15px">' +
+            '                                打印' +
+            '                            </button>']
+        } else {
+            return ['<button type="button" id="imprinter" class="btn btn-default btn-sm disabled" style="margin-right: 15px">' +
+            '                                <span>打印 </span>' +
+            '                            </button>']
+        }
+    }
 
     function statusFormatter(value,row,index) {
         if(value==0){
@@ -99,8 +130,9 @@ $(function () {
         $('#scoretab').bootstrapTable('refresh',{url:'/admin/getAllScore'});
     })
     //打印功能
-    $('.bootstrap-table').change(function () {
+    /*$('.bootstrap-table').change(function () {
         var dataArr=$('#scoretab .selected');
+        console.log('选择的数据:'+JSON.stringify($('#scoretab').bootstrapTable('getSelections')))
         if(dataArr.length>=1){
             $('#btn_print').css('display','block').removeClass('fadeOutRight').addClass('animated fadeInRight')
         } else {
@@ -109,7 +141,7 @@ $(function () {
                 $('#btn_print').css('display','none')
             })
         }
-    })
+    })*/
     $("#btn_print").click(function () {
         // $('#qrcode').append('<img src="/static/images/certificate.jpg" class="img1"/><div class="body text"><h3>尤振强\t</h3></div>' +
         //     '<div class="year"><h4>18</h4></div><div class="month"><h4>12</h4></div><div class="day"><h4>06</h4></div>')

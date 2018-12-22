@@ -39,4 +39,13 @@ public interface ExamPaperService {
      * @return
      */
     ExamPaper selectExamPaper(Integer id);
+
+    /**
+     * 开卷
+     * @param examId
+     * @return
+     */
+    boolean startExam(Integer examId);
+
+    ExamPaper getExamPaper();
 }
