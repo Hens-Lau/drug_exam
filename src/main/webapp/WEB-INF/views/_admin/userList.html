@@ -46,13 +46,14 @@
         </ul>
     </div>
     <div class="col-xs-10 col-xs-offset-2 content" id="content">
+        <div class="tableBody">
         <div class="panel panel-primary box pad">
             <div class="panel-heading">
-                <h2 class="panel-title pull-left" style="line-height: 39px">用户</h2>
+                <h2 class="panel-title pull-left" style="line-height: 20px">用户列表</h2>
                 <div class="clearfix"></div>
             </div>
-            <div class="panel-body">
-                <div class="panel panel-default">
+            <div class="panel panel-default">
+                <div class="panel-body form-group">
                     <label class="col-sm-2 control-label text-right">用户编号</label>
                     <div class="col-sm-2">
                         <input type="text" class="form-control" name="studentNo" id="search_studentNo">
@@ -65,14 +66,16 @@
                         <button class="btn btn-primary" id="search_btn">查询</button>
                     </div>
                 </div>
-                <table id="usertab" class="table table-hover"></table>
-                <div id="toolbar" class="btn-group pull-right">
-                    <button id="btn_valid" type="button" class="btn btn-default" style="display: none">
-                        <span class="glyphicon glyphicon-bookmark" aria-hidden="true">审核</span>
+
+            <table id="usertab" class="table table-hover"></table>
+            <div id="toolbar" class="btn-group pull-right">
+                <button id="btn_valid" type="button" class="btn btn-default" style="display: none">
+                        <span class="glyphicon glyphicon-lock" aria-hidden="true">审核</span>
                     </button>
-                </div>
+            </div>
             </div>
         </div>
+    </div>
     </div>
 </div>
 </body>

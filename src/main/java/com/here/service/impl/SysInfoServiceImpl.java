@@ -89,7 +89,7 @@ public class SysInfoServiceImpl implements SysInfoService {
         try {
             ia = InetAddress.getLocalHost();
             ip = LOCALMAC.getLocalMac(ia);
-            LOG.info("本机ip是,{}",ip);
+//            LOG.info("本机ip是,{}",ip);
         } catch (UnknownHostException e) {
             LOG.error("查询本机ip异常");
         } catch (SocketException e) {
