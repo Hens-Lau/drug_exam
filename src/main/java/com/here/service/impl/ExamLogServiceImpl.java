@@ -213,6 +213,9 @@ public class ExamLogServiceImpl implements ExamLogService {
     private BigDecimal rewinding(List<QuestionWithBLOBs> questionList, Map<Integer,String> answerMap){
         BigDecimal total = new BigDecimal(0);
         for(QuestionWithBLOBs question: questionList){
+            if(StringUtils.isBlank(question.getAnswer())){
+                LOG.error("考题没有设置答案:{},{}",question.getId(),question.getAnswer());
+            }
             if(StringUtils.equalsIgnoreCase(question.getAnswer(),answerMap.get(question.getId()))){
                 if(question.getInitScore()==null){
                     LOG.warn("考题没有设定分数,id:{},使用默认分数:{}",question.getId(),5);

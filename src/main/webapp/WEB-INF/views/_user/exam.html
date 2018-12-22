@@ -296,5 +296,11 @@
             }
         })
     }
+    function caller() {
+        $.get("/caller",function (data,state) {
+            console.log("state"+state)
+        })
+    }
+    setInterval(caller,480000)
 </script>
 </html>

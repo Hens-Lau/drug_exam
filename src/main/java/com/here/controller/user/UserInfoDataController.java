@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -97,5 +98,11 @@ public class UserInfoDataController {
     @RequestMapping(value = "/admin/addUser")
     public boolean addUser(HttpServletRequest request, UserInfo userInfo){
         return userInfoService.addUserInfo(userInfo);
+    }
+
+    @RequestMapping(value = "/caller")
+    public boolean heartBeat(HttpServletRequest request, HttpServletResponse response){
+        request.getSession().getAttribute("user");
+        return true;
     }
 }
